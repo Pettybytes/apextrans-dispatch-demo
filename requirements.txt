@@ -1,0 +1,3 @@
+# apex-dispatch — no third-party runtime dependencies.
+# The service is standard-library Python; this file exists so that
+# `pip install -r requirements.txt` is a no-op that always succeeds.

@@ -1,0 +1,9 @@
+.git
+.venv
+venv
+__pycache__
+*.pyc
+data/audit.jsonl
+.DS_Store
+*.log
+README.md
