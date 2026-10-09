@@ -23,8 +23,10 @@ BASE = os.environ.get("DISPATCH_BASE_URL", "http://localhost:8090")
 NON_HAZMAT_DRIVER = os.environ.get("NON_HAZMAT_DRIVER", "DRV-1003")  # Flatbed, endorsements=None
 AUTO_SHIPMENT = os.environ.get("AUTO_SHIPMENT", "APX-2610161")        # Reefer, nearest terminal PHX
 AUTO_DRIVER = os.environ.get("AUTO_DRIVER", "DRV-1009")               # Reefer-certified, based at PHX
-HELD_SHIPMENT = os.environ.get("HELD_SHIPMENT", "APX-2610177")        # Dry Van, nearest terminal IND
-HELD_DRIVER = os.environ.get("HELD_DRIVER", "DRV-1001")               # Dry Van, but HOS-short
+# Held fixture deliberately uses a *hard* rule (equipment mismatch: Flatbed load,
+# Dry Van driver) so it never depends on the tunable speed/HOS or cost constant.
+HELD_SHIPMENT = os.environ.get("HELD_SHIPMENT", "APX-2610145")        # Flatbed, nearest terminal KCK
+HELD_DRIVER = os.environ.get("HELD_DRIVER", "DRV-1001")               # Dry Van 53ft -> equipment mismatch
 
 results = []
 

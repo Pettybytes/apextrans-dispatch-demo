@@ -333,7 +333,7 @@ def build_prompt(exceptions, candidates_by_shipment):
         "You are a dispatcher assistant for ApexTrans.",
         "For each exception choose the single best available driver.",
         "Prefer drivers that match the equipment and endorsement, have enough HOS for",
-        "deadhead_miles + remaining_miles at 50 mph, are closest (lowest cost), and can still",
+        "deadhead_miles + remaining_miles at 55 mph, are closest (lowest cost), and can still",
         "meet delivery_due_utc. If no driver is a clean fit, still pick the least-bad option.",
         "Reply with JSON only, shape:",
         '{"picks":[{"shipment_id":"APX-...","new_driver_id":"DRV-....","reason":"one sentence"}]}',

@@ -21,7 +21,7 @@ A cost above the limit is reported as a conflict
 | 1 | **Equipment mismatch** | `Reefer` load needs `Reefer 53ft`; `Flatbed` needs `Flatbed 48ft`; `Dry Van` and `Hazmat` need `Dry Van 53ft` |
 | 2 | **Hazmat endorsement** | A `Hazmat` load may only go to a driver holding the `Hazmat` endorsement |
 | 3 | **Reefer certification** | A `Reefer` load may only go to a `Reefer-certified` driver |
-| 4 | **Hours of service** | `hos_hours_left` must cover the whole job: `(deadhead_miles + remaining_miles) / 50 mph` |
+| 4 | **Hours of service** | `hos_hours_left` must cover the whole job: `(deadhead_miles + remaining_miles) / 55 mph` |
 | 5 | **Availability** | Driver must be `Available`, and must not already be holding another pending proposal |
 
 ## Soft conflicts — hold for a human
@@ -45,7 +45,7 @@ reroute_cost_usd = deadhead_miles × (fuel_cost_per_mile_usd + 0.95)
 ## Derived quantities
 
 - `remaining_miles = miles × (100 − percent_complete) / 100`
-- `transit_hours = (deadhead_miles + remaining_miles) / 50 mph`
+- `transit_hours = (deadhead_miles + remaining_miles) / 55 mph`
 - `new_eta_utc = max(now_utc, pickup_utc) + transit_hours`
 
 ## On apply (`auto_applied` or an approved proposal)
@@ -62,7 +62,7 @@ reroute_cost_usd = deadhead_miles × (fuel_cost_per_mile_usd + 0.95)
 | Variable | Default | Meaning |
 | --- | --- | --- |
 | `DISPATCH_AUTO_LIMIT_USD` | `500` | Auto-approval ceiling |
-| `DISPATCH_SPEED_MPH` | `50` | Planning speed for HOS and ETA |
+| `DISPATCH_SPEED_MPH` | `55` | Planning speed for HOS and ETA |
 | `DISPATCH_CIRCUITY_FACTOR` | `1.2` | Great-circle → road-mile multiplier |
 | `DISPATCH_DEADHEAD_ADDON` | `0.95` | Per-mile adder in the cost model |
 

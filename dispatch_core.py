@@ -22,7 +22,7 @@ DATA_DIR = os.environ.get("DISPATCH_DATA_DIR") or os.path.join(HERE, "data")
 AUDIT_PATH = os.path.join(DATA_DIR, "audit.jsonl")
 
 # ---- Tunables (documented in approval_limits.md) --------------------------
-SPEED_MPH = float(os.environ.get("DISPATCH_SPEED_MPH", "50"))
+SPEED_MPH = float(os.environ.get("DISPATCH_SPEED_MPH", "55"))
 CIRCUITY_FACTOR = float(os.environ.get("DISPATCH_CIRCUITY_FACTOR", "1.2"))
 DEADHEAD_ADDON_PER_MILE = float(os.environ.get("DISPATCH_DEADHEAD_ADDON", "0.95"))
 AUTO_APPROVE_LIMIT_USD = float(os.environ.get("DISPATCH_AUTO_LIMIT_USD", "500"))
