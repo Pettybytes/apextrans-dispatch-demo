@@ -1,0 +1,362 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "ApexTrans Dispatch API",
+    "version": "1.0.0",
+    "description": "Shipment data and dispatch reroute rules for ApexTrans. Kong AI Gateway turns these operations into MCP tools and controls which identity may call each one."
+  },
+  "servers": [
+    { "url": "http://apex-dispatch:8090", "description": "Kong Docker network" },
+    { "url": "http://localhost:8090", "description": "Local / direct" }
+  ],
+  "tags": [
+    { "name": "health" },
+    { "name": "exceptions" },
+    { "name": "shipments" },
+    { "name": "drivers" },
+    { "name": "reroutes" },
+    { "name": "updates" },
+    { "name": "audit" }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "get_health",
+        "summary": "Health check",
+        "description": "Liveness probe. Returns {\"ok\": true}.",
+        "tags": ["health"],
+        "responses": {
+          "200": {
+            "description": "Service is up",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object", "properties": { "ok": { "type": "boolean" } } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/exceptions": {
+      "get": {
+        "operationId": "list_exceptions",
+        "summary": "List open shipment exceptions",
+        "description": "Open exceptions awaiting dispatch action: shipment id, customer, load type, lane, current location, nearest terminal, exception type/note, priority, and due-vs-ETA.",
+        "tags": ["exceptions"],
+        "responses": {
+          "200": {
+            "description": "Open exceptions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": { "type": "integer" },
+                    "exceptions": { "type": "array", "items": { "$ref": "#/components/schemas/Exception" } }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/shipments/{shipment_id}": {
+      "get": {
+        "operationId": "get_shipment",
+        "summary": "Get one shipment",
+        "description": "Full shipment record by id, plus remaining miles and resolved nearest terminal.",
+        "tags": ["shipments"],
+        "parameters": [
+          {
+            "name": "shipment_id",
+            "in": "path",
+            "required": true,
+            "description": "Shipment id, e.g. APX-2610141",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Shipment record",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Shipment" } }
+            }
+          },
+          "404": { "description": "Unknown shipment" }
+        }
+      }
+    },
+    "/drivers/available": {
+      "get": {
+        "operationId": "list_available_drivers",
+        "summary": "List available drivers",
+        "description": "Drivers with status Available, optionally filtered by terminal, equipment and endorsement. When shipment_id is supplied, each driver is returned with deadhead_miles to that shipment's nearest terminal, the reroute cost estimate and its equipment/endorsement match.",
+        "tags": ["drivers"],
+        "parameters": [
+          { "name": "terminal", "in": "query", "required": false, "schema": { "type": "string" }, "description": "Driver current terminal code, e.g. DEN" },
+          { "name": "equipment", "in": "query", "required": false, "schema": { "type": "string" }, "description": "Exact equipment, e.g. 'Reefer 53ft'" },
+          { "name": "endorsement", "in": "query", "required": false, "schema": { "type": "string" }, "description": "Required endorsement, e.g. Hazmat" },
+          { "name": "shipment_id", "in": "query", "required": false, "schema": { "type": "string" }, "description": "Adds deadhead_miles and cost to the shipment's nearest terminal" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matching available drivers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": { "type": "integer" },
+                    "drivers": { "type": "array", "items": { "$ref": "#/components/schemas/Driver" } }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reroutes": {
+      "get": {
+        "operationId": "list_pending_reroutes",
+        "summary": "List held reroute proposals",
+        "description": "Reroute proposals currently held for human approval (use status=pending).",
+        "tags": ["reroutes"],
+        "parameters": [
+          { "name": "status", "in": "query", "required": false, "schema": { "type": "string", "enum": ["pending", "all"] }, "description": "pending returns only proposals held for a human" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Proposals",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": { "type": "integer" },
+                    "proposals": { "type": "array", "items": { "$ref": "#/components/schemas/Proposal" } }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "create_reroute",
+        "summary": "Propose a reroute",
+        "description": "Run the dispatch guardrails for moving a shipment to a new driver. Auto-applies when there are no conflicts and the cost is within the auto-approval limit; otherwise the proposal is held for a human with a conflicts list.",
+        "tags": ["reroutes"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RerouteRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Proposal (auto_applied or pending_human)",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Proposal" } }
+            }
+          },
+          "400": { "description": "Invalid body" },
+          "404": { "description": "Unknown shipment or driver" }
+        }
+      }
+    },
+    "/reroutes/{proposal_id}/approve": {
+      "post": {
+        "operationId": "approve_reroute",
+        "summary": "Approve a held reroute",
+        "description": "Apply a proposal that is currently held for human approval. Only a supervisor identity is expected to reach this operation through the gateway.",
+        "tags": ["reroutes"],
+        "parameters": [
+          { "name": "proposal_id", "in": "path", "required": true, "schema": { "type": "string" }, "description": "Proposal id, e.g. RR-0003" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ApproveRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Applied proposal", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Proposal" } } } },
+          "404": { "description": "Unknown proposal" },
+          "409": { "description": "Proposal is not awaiting approval" }
+        }
+      }
+    },
+    "/updates": {
+      "get": {
+        "operationId": "list_updates",
+        "summary": "Applied changes feed",
+        "description": "Feed of applied changes and customer-facing ETA messages, newest first.",
+        "tags": ["updates"],
+        "responses": {
+          "200": {
+            "description": "Applied-change feed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": { "type": "integer" },
+                    "updates": { "type": "array", "items": { "$ref": "#/components/schemas/Update" } }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/audit": {
+      "get": {
+        "operationId": "list_audit",
+        "summary": "Decision audit trail",
+        "description": "Every proposal, decision and approval with UTC timestamps, newest first.",
+        "tags": ["audit"],
+        "responses": {
+          "200": {
+            "description": "Audit trail",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": { "type": "integer" },
+                    "audit": { "type": "array", "items": { "$ref": "#/components/schemas/AuditEvent" } }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Exception": {
+        "type": "object",
+        "properties": {
+          "shipment_id": { "type": "string" },
+          "customer": { "type": "string" },
+          "load_type": { "type": "string" },
+          "equipment": { "type": "string" },
+          "lane": { "type": "string" },
+          "current_location": { "type": "string" },
+          "nearest_terminal": { "type": "string" },
+          "exception_type": { "type": "string" },
+          "exception_note": { "type": "string" },
+          "priority": { "type": "string" },
+          "delivery_due_utc": { "type": "string" },
+          "eta_utc": { "type": "string" },
+          "late_vs_due_hours": { "type": "number" },
+          "on_time": { "type": "boolean" },
+          "miles": { "type": "number" },
+          "remaining_miles": { "type": "number" },
+          "percent_complete": { "type": "number" },
+          "hazmat": { "type": "string" },
+          "driver_id": { "type": "string" }
+        }
+      },
+      "Shipment": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "shipment_id": { "type": "string" },
+          "status": { "type": "string" },
+          "driver_id": { "type": "string" },
+          "eta_utc": { "type": "string" },
+          "remaining_miles": { "type": "number" },
+          "nearest_terminal": { "type": "string" }
+        }
+      },
+      "Driver": {
+        "type": "object",
+        "properties": {
+          "driver_id": { "type": "string" },
+          "name": { "type": "string" },
+          "status": { "type": "string" },
+          "home_terminal": { "type": "string" },
+          "current_terminal": { "type": "string" },
+          "current_city": { "type": "string" },
+          "hos_hours_left": { "type": "number" },
+          "endorsements": { "type": "string" },
+          "equipment": { "type": "string" },
+          "safety_score": { "type": "string" },
+          "holds_pending_proposal": { "type": "boolean" },
+          "deadhead_miles": { "type": "number" },
+          "reroute_cost_usd": { "type": "number" },
+          "transit_hours_needed": { "type": "number" },
+          "equipment_match": { "type": "boolean" },
+          "endorsement_match": { "type": "boolean" }
+        }
+      },
+      "RerouteRequest": {
+        "type": "object",
+        "required": ["shipment_id", "new_driver_id"],
+        "properties": {
+          "shipment_id": { "type": "string", "example": "APX-2610141" },
+          "new_driver_id": { "type": "string", "example": "DRV-1004" },
+          "reason": { "type": "string", "example": "Equipment breakdown; reassign load" },
+          "requested_by": { "type": "string", "example": "exception-agent" }
+        }
+      },
+      "ApproveRequest": {
+        "type": "object",
+        "required": ["approver"],
+        "properties": {
+          "approver": { "type": "string", "example": "dispatch-supervisor" },
+          "note": { "type": "string", "example": "Approved - customer accepted new ETA" }
+        }
+      },
+      "Proposal": {
+        "type": "object",
+        "properties": {
+          "proposal_id": { "type": "string" },
+          "shipment_id": { "type": "string" },
+          "new_driver_id": { "type": "string" },
+          "deadhead_miles": { "type": "number" },
+          "reroute_cost_usd": { "type": "number" },
+          "new_eta_utc": { "type": "string" },
+          "conflicts": { "type": "array", "items": { "type": "string" } },
+          "decision": { "type": "string", "enum": ["auto_applied", "pending_human"] },
+          "status": { "type": "string", "enum": ["applied"] },
+          "reason": { "type": "string" },
+          "requested_by": { "type": "string" },
+          "created_utc": { "type": "string" },
+          "applied_utc": { "type": "string" },
+          "applied_by": { "type": "string" }
+        }
+      },
+      "Update": {
+        "type": "object",
+        "properties": {
+          "ts_utc": { "type": "string" },
+          "shipment_id": { "type": "string" },
+          "proposal_id": { "type": "string" },
+          "driver_id": { "type": "string" },
+          "driver_name": { "type": "string" },
+          "new_eta_utc": { "type": "string" },
+          "message": { "type": "string" }
+        }
+      },
+      "AuditEvent": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "ts_utc": { "type": "string" },
+          "event": { "type": "string", "enum": ["proposal.created", "proposal.approved", "shipment.rerouted"] }
+        }
+      }
+    }
+  }
+}
