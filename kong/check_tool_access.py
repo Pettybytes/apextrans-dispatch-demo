@@ -42,9 +42,9 @@ SQUADS = [
 
 # Tools each identity must NOT be able to see, as a second pair of eyes on the ACLs.
 MUST_NOT_SEE = {
-    "support-bot": ["create_reroute", "approve_reroute"],
+    "support-bot": ["create_reroute", "approve_reroute", "list_audit"],
     "dispatch-copilot": ["approve_reroute"],
-    "compliance-docs": ["create_reroute", "approve_reroute"],
+    "compliance-docs": ["create_reroute", "approve_reroute", "list_updates"],
     "dispatch-supervisor": [],
 }
 

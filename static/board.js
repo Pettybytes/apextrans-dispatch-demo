@@ -448,12 +448,12 @@
     var s = state.squads;
     if (!s) return;
     if (s.title) $('squadsTitle').textContent = s.title;
-    var head = '<tr><th>Identity</th><th>Team</th><th>Token limit</th><th>Tools</th><th>Can approve</th></tr>';
+    var head = '<tr><th>Identity</th><th>What it does</th><th>Token limit</th><th>Tools</th><th>Can approve</th></tr>';
     var body = (s.identities || []).map(function (i) {
       return '' +
         '<tr class="' + (i.in_use ? 'in-use' : '') + '">' +
           '<td class="id">' + esc(i.identity) + '</td>' +
-          '<td class="sub">' + esc(i.team) + '</td>' +
+          '<td class="sub">' + esc(i.what_it_does) + '</td>' +
           '<td class="num">' + esc(i.token_limit) + '</td>' +
           '<td>' + esc(i.tools) + '</td>' +
           '<td>' + esc(i.can_approve) + '</td>' +

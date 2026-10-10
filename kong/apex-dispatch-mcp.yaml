@@ -77,7 +77,7 @@ ai_gateway_mcp_servers:
         path: "/apex-dispatch/shipments/{shipment_id}"
         access:
           acls:
-            allow: [dispatch-copilot, dispatch-supervisor, support-bot]
+            allow: [support-bot, dispatch-copilot, compliance-docs, dispatch-supervisor]
         parameters:
           - name: shipment_id
             in: path
@@ -190,7 +190,7 @@ ai_gateway_mcp_servers:
         path: "/apex-dispatch/updates"
         access:
           acls:
-            allow: [dispatch-copilot, dispatch-supervisor, support-bot, compliance-docs]
+            allow: [support-bot, dispatch-copilot, dispatch-supervisor]
 
       - name: list_audit
         description: List every proposal, decision and approval with UTC timestamps, newest first.
@@ -198,4 +198,4 @@ ai_gateway_mcp_servers:
         path: "/apex-dispatch/audit"
         access:
           acls:
-            allow: [dispatch-copilot, dispatch-supervisor, compliance-docs]
+            allow: [dispatch-copilot, compliance-docs, dispatch-supervisor]

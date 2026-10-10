@@ -1,17 +1,18 @@
 {
   "_comment": "Static squad access panel for the demo board. Rendered by /board from this file - no Konnect calls, no keys. The 'tools' counts must match the per-tool access.acls.allow lists in kong/apex-dispatch-mcp.yaml; kong/check_tool_access.py verifies them against the live gateway. Edit a value here and reload the page.",
+  "_tools": "support-bot: get_shipment + list_updates | dispatch-copilot: all except approve_reroute | compliance-docs: get_shipment + list_audit | dispatch-supervisor: all 8",
   "title": "Who can do what · enforced by Kong AI Gateway",
   "identities": [
     {
       "identity": "support-bot",
-      "team": "Customer support",
+      "what_it_does": "Answers shipper questions 24/7",
       "token_limit": "100 tokens/min",
       "tools": "2",
       "can_approve": "No"
     },
     {
       "identity": "dispatch-copilot",
-      "team": "Dispatch (AI agent)",
+      "what_it_does": "Proposes reroutes for exceptions",
       "token_limit": "5,000 tokens/min",
       "tools": "7",
       "can_approve": "No",
@@ -19,14 +20,14 @@
     },
     {
       "identity": "compliance-docs",
-      "team": "Compliance",
+      "what_it_does": "Drafts paperwork and audits decisions",
       "token_limit": "2,000 tokens/min",
       "tools": "2",
       "can_approve": "No"
     },
     {
       "identity": "dispatch-supervisor",
-      "team": "Dispatch (human approver)",
+      "what_it_does": "Human approver",
       "token_limit": "No limit",
       "tools": "8",
       "can_approve": "Yes, human only"
