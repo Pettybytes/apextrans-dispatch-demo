@@ -16,9 +16,13 @@ still be rehearsed offline.
 Secrets are read from the environment and are never printed.
 
 Usage:
-    python3 exception_agent.py --direct          # tools -> localhost:8090
-    python3 exception_agent.py                   # everything through Kong
-    python3 exception_agent.py --yes             # auto-answer the approval prompt
+    python3 exception_agent.py --direct                 # tools -> localhost:8090
+    python3 exception_agent.py                          # everything through Kong
+    python3 exception_agent.py --model apex-claude      # pick the gateway LLM route
+    python3 exception_agent.py --yes                    # auto-answer the approval prompt
+
+In gateway mode APEX_MCP_URL defaults to $KONNECT_PROXY_URL/apex-dispatch
+(falling back to http://localhost:8000/apex-dispatch).
 """
 
 from __future__ import annotations
@@ -282,6 +286,8 @@ class Tools:
             return name
         return None
 
+    # Argument names match Kong's MCP renaming: {in}_{name} for parameters, and a
+    # single collapsed `body` object for request bodies.
     def list_exceptions(self):
         if self.mcp:
             return self.mcp.call(self._resolve("exceptions"), {}).get("exceptions", [])
@@ -289,27 +295,33 @@ class Tools:
 
     def list_available_drivers(self, shipment_id):
         if self.mcp:
-            payload = self.mcp.call(self._resolve("driver"), {"shipment_id": shipment_id})
+            payload = self.mcp.call(self._resolve("driver"), {"query_shipment_id": shipment_id})
             return payload.get("drivers", [])
         return self.direct.list_available_drivers(shipment_id)
 
     def create_reroute(self, shipment_id, new_driver_id, reason):
         if self.mcp:
             return self.mcp.call(
-                self._resolve("create_reroute", "reroute"),
-                {"shipment_id": shipment_id, "new_driver_id": new_driver_id, "reason": reason, "requested_by": "exception-agent"},
+                self._resolve("create"),
+                {"body": {
+                    "shipment_id": shipment_id,
+                    "new_driver_id": new_driver_id,
+                    "reason": reason,
+                    "requested_by": "exception-agent",
+                }},
             )
         return self.direct.create_reroute(shipment_id, new_driver_id, reason)
 
     def try_approve_as_agent(self, proposal_id):
-        """Step 5: the agent tries to approve. Through Kong this must be 403."""
+        """Step 5: the agent tries to approve. Through Kong this must be refused."""
         if not self.mcp:
             return None
+        tool = McpTools._pick(list(self.names), "approve")
+        if not tool:
+            return "not_found", {"error": "approve_reroute is not exposed to this identity"}
         try:
-            self.mcp.call(
-                self._resolve("approve"),
-                {"proposal_id": proposal_id, "approver": "exception-agent", "note": "agent attempting self-approval"},
-            )
+            self.mcp.call(tool, {"path_proposal_id": proposal_id,
+                                 "body": {"approver": "exception-agent", "note": "agent attempting self-approval"}})
             return 200, {"note": "gateway allowed the agent to approve (unexpected)"}
         except HttpError as exc:
             return exc.status, {"error": exc.args[0]}
@@ -317,7 +329,8 @@ class Tools:
     def approve(self, proposal_id, approver, note):
         if self.mcp:
             return 200, self.mcp.call(
-                self._resolve("approve"), {"proposal_id": proposal_id, "approver": approver, "note": note}
+                self._resolve("approve"),
+                {"path_proposal_id": proposal_id, "body": {"approver": approver, "note": note}},
             )
         return self.direct.approve_reroute(proposal_id, approver, note)
 
@@ -373,12 +386,13 @@ def extract_json(text):
         raise
 
 
-def call_llm(proxy_url, api_key, prompt):
+def call_llm(proxy_url, api_key, prompt, model=LLM_MODEL):
     """POST the gateway's OpenAI-compatible chat endpoint."""
     url = proxy_url.rstrip("/") + "/v1/chat/completions"
     body = {
-        "model": LLM_MODEL,
+        "model": model,
         "temperature": 0,
+        "max_tokens": 400,
         "messages": [
             {"role": "system", "content": "You are a precise freight dispatcher. Reply with JSON only."},
             {"role": "user", "content": prompt},
@@ -441,6 +455,8 @@ def main():
     parser.add_argument("--no-color", action="store_true", help="disable ANSI colour")
     parser.add_argument("--color", action="store_true", help="force ANSI colour")
     parser.add_argument("--limit", type=int, default=0, help="only handle the first N exceptions (0 = all)")
+    parser.add_argument("--model", default=os.environ.get("APEX_LLM_MODEL", "my-gpt-4o"),
+                        help="gateway LLM route: my-gpt-4o (default), apex-claude or apex-open")
     args = parser.parse_args()
 
     if args.no_color:
@@ -452,15 +468,13 @@ def main():
     proxy_url = os.environ.get("KONNECT_PROXY_URL")
     key_dispatch = os.environ.get("KEY_DISPATCH")
     key_supervisor = os.environ.get("KEY_SUPERVISOR")
-    mcp_url = os.environ.get("APEX_MCP_URL")
+    gateway = (proxy_url or "http://localhost:8000").rstrip("/")
+    mcp_url = os.environ.get("APEX_MCP_URL") or (gateway + "/apex-dispatch")
 
     if args.direct:
         tools = Tools(direct_base=args.base)
         mode = "DIRECT (pre-gateway): tools -> %s" % args.base
     else:
-        if not mcp_url:
-            print("%sAPEX_MCP_URL is not set - cannot reach the gateway MCP route.%s" % (RED, RESET))
-            return 2
         tools = Tools(mcp=McpTools(mcp_url, key_dispatch))
         mode = "GATEWAY: MCP -> %s" % mcp_url
 
@@ -479,6 +493,10 @@ def main():
         note("direct mode: no gateway in front, showing the service's own operations")
     for name in names:
         print("    - %s" % name)
+    if tools.mcp:
+        approves_visible = any("approve" in name.lower() for name in names)
+        note("%d tools visible; approve_reroute %s"
+             % (len(names), "VISIBLE" if approves_visible else "hidden (expected for the agent)"))
     if not names:
         print("%sNo tools visible - stopping.%s" % (RED, RESET))
         return 2
@@ -502,13 +520,13 @@ def main():
               % (exception["shipment_id"], exception["load_type"], exception["nearest_terminal"], len(drivers), exception["exception_type"]))
 
     # 3. ask the model to choose
-    step(3, "ask %s to choose a driver per exception" % LLM_MODEL)
+    step(3, "ask %s to choose a driver per exception" % args.model)
     prompt = build_prompt(exceptions, candidates_by_shipment)
     allocated = allocate(exceptions, candidates_by_shipment)
     picks = []
     if proxy_url and key_dispatch:
         try:
-            decision, usage = call_llm(proxy_url, key_dispatch, prompt)
+            decision, usage = call_llm(proxy_url, key_dispatch, prompt, args.model)
             picks = decision.get("picks", []) or []
             note("model replied (tokens: %s)" % usage.get("total_tokens", "?"))
         except HttpError as exc:
@@ -568,7 +586,10 @@ def main():
         target = held[0]["proposal_id"]
         if tools.mcp:
             status, payload = tools.try_approve_as_agent(target)
-            if status == 403:
+            if status == "not_found":
+                print("    %stool not found - approve_reroute is not exposed to this identity%s" % (RED, RESET))
+                print("        %s%s%s" % (RED, payload.get("error", ""), RESET))
+            elif status == 403:
                 print("    %s403 Forbidden - the gateway blocked the agent from approving %s%s" % (RED, target, RESET))
                 print("        %s%s%s" % (RED, payload.get("error", ""), RESET))
             else:
