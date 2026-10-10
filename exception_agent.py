@@ -31,6 +31,7 @@ import argparse
 import json
 import os
 import re
+import subprocess
 import sys
 import time
 import urllib.error
@@ -264,6 +265,13 @@ class McpTools:
                     return {"text": item["text"]}
         return result
 
+    def call_raw(self, tool_name, arguments):
+        """Like call(), but returns (status, payload) instead of raising."""
+        try:
+            return 200, self.call(tool_name, arguments)
+        except HttpError as exc:
+            return exc.status, {"error": exc.args[0]}
+
 
 # --------------------------------------------------------------------- toolset
 class Tools:
@@ -330,13 +338,27 @@ class Tools:
         except HttpError as exc:
             return exc.status, {"error": exc.args[0]}
 
-    def approve(self, proposal_id, approver, note):
-        if self.mcp:
-            return 200, self.mcp.call(
-                self._resolve("approve"),
-                {"path_proposal_id": proposal_id, "body": {"approver": approver, "note": note}},
-            )
-        return self.direct.approve_reroute(proposal_id, approver, note)
+    def approve_as_supervisor(self, proposal_id, approver, note, mcp_url=None, supervisor_key=None):
+        """Approve using a SEPARATE MCP session owned by the supervisor key.
+
+        The agent's own session is never used for approval. Returns
+        (status, payload, supervisor_tool_count).
+        """
+        if not self.mcp:
+            status, payload = self.direct.approve_reroute(proposal_id, approver, note)
+            return status, payload, None
+
+        session = McpTools(mcp_url, supervisor_key)
+        session.handshake()
+        names = session.list_tools()
+        tool = McpTools._pick(names, "approve")
+        if not tool:
+            return "not_found", {"error": "approve_reroute is not visible to the supervisor"}, len(names)
+        status, payload = session.call_raw(
+            tool,
+            {"path_proposal_id": proposal_id, "body": {"approver": approver, "note": note}},
+        )
+        return status, payload, len(names)
 
     def list_updates(self):
         if self.mcp:
@@ -433,40 +455,84 @@ def call_llm(proxy_url, api_key, prompt, model=LLM_MODEL):
     return extract_json(content), payload.get("usage", {})
 
 
-def allocate(exceptions, candidates_by_shipment, reserved=None):
-    """Global greedy allocation: the best-matched, cheapest driver per exception.
+def resolve_picks(exceptions, candidates_by_shipment, model_picks):
+    """Choose one driver per exception, cheapest valid match first.
 
-    Candidate pairs are ranked (hard-constraint match, HOS coverage, cost) and
-    assigned cheapest-first, so one driver is never promised to two loads.
+    A driver may be used at most once. A model pick is rejected only when it is
+    missing, already used, or not one of that exception's candidates; a pick that
+    breaks equipment/endorsement rules is still sent to the service, so the
+    server's own guardrail holds it (that is intended, and visible in the output).
+
+    Returns a list of (exception, pick, rejected_detail), never skipping one.
     """
-    used = set(reserved or ())
-    ranked = []
-    for exception in exceptions:
-        shipment_id = exception["shipment_id"]
-        for candidate in candidates_by_shipment.get(shipment_id, []):
-            if candidate.get("holds_pending_proposal"):
-                continue
-            matched = bool(candidate.get("equipment_match")) and bool(candidate.get("endorsement_match"))
-            hos_ok = candidate["hos_hours_left"] >= candidate.get("transit_hours_needed", 0)
-            rank = (0 if matched else 1, 0 if hos_ok else 1, candidate.get("reroute_cost_usd", 1e9))
-            ranked.append((rank, shipment_id, candidate))
-    ranked.sort(key=lambda item: item[0])
+    def best_candidate(candidates, used, ignore_used=False):
+        pool = [c for c in candidates if ignore_used or c["driver_id"] not in used]
+        if not pool:
+            return None
+        matched = [c for c in pool if c.get("equipment_match") and c.get("endorsement_match")]
+        pool = matched or pool
+        return min(pool, key=lambda c: (c.get("reroute_cost_usd", 1e9), c.get("deadhead_miles", 1e9)))
 
-    picks = {}
-    for _, shipment_id, candidate in ranked:
-        if shipment_id in picks or candidate["driver_id"] in used:
+    def cheapest_match_cost(exception):
+        best = best_candidate(candidates_by_shipment.get(exception["shipment_id"], []), set())
+        return best.get("reroute_cost_usd", 1e9) if best else 1e9
+
+    resolved = []
+    used = set()
+    for exception in sorted(exceptions, key=cheapest_match_cost):
+        shipment_id = exception["shipment_id"]
+        candidates = candidates_by_shipment.get(shipment_id, [])
+        allowed = {candidate["driver_id"] for candidate in candidates}
+        model_pick = model_picks.get(shipment_id) or {}
+        driver = model_pick.get("new_driver_id")
+
+        reason = None
+        if not driver:
+            reason = "model returned no pick"
+        elif driver in used:
+            reason = "already used"
+        elif driver not in allowed:
+            reason = "not in this exception's candidates"
+
+        if reason is None:
+            resolved.append((exception, model_pick, None))
+            used.add(driver)
             continue
-        matched = bool(candidate.get("equipment_match")) and bool(candidate.get("endorsement_match"))
-        picks[shipment_id] = {
-            "shipment_id": shipment_id,
-            "new_driver_id": candidate["driver_id"],
-            "reason": "allocated %s - %s mi deadhead, $%.0f, %s"
-            % (candidate["equipment"], candidate.get("deadhead_miles", 0),
-               candidate.get("reroute_cost_usd", 0),
-               "meets equipment/endorsement" if matched else "least-bad available"),
-        }
-        used.add(candidate["driver_id"])
-    return picks
+
+        fallback = best_candidate(candidates, used) or best_candidate(candidates, used, ignore_used=True)
+        if fallback is None:
+            print("    %s: model pick %s rejected (%s) and nothing to fall back on"
+                  % (shipment_id, driver or "-", reason))
+            continue
+        print("    %s: model pick %s rejected (%s) -> using %s"
+              % (shipment_id, driver or "-", reason, fallback["driver_id"]))
+        resolved.append((
+            exception,
+            {"shipment_id": shipment_id,
+             "new_driver_id": fallback["driver_id"],
+             "reason": "fallback: %s mi deadhead" % fallback.get("deadhead_miles", 0)},
+            "%s -> %s" % (driver or "-", fallback["driver_id"]),
+        ))
+        used.add(fallback["driver_id"])
+    return resolved
+
+
+def reset_container(base):
+    """Restart the dispatch container so a run starts from fresh state."""
+    name = os.environ.get("APEX_CONTAINER", "apex-dispatch")
+    print("resetting %s so this run starts from fresh state ..." % name)
+    if subprocess.call(["docker", "restart", name],
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) != 0:
+        print("%scould not restart %s - is Docker running?%s" % (RED, name, RESET))
+        return False
+    for _ in range(30):
+        try:
+            urllib.request.urlopen(base.rstrip("/") + "/health", timeout=2)
+            return True
+        except Exception:
+            time.sleep(1)
+    print("%s%s did not come back healthy%s" % (RED, name, RESET))
+    return False
 
 
 # -------------------------------------------------------------------- the flow
@@ -481,6 +547,8 @@ def main():
     parser.add_argument("--limit", type=int, default=0, help="only handle the first N exceptions (0 = all)")
     parser.add_argument("--model", default=os.environ.get("APEX_LLM_MODEL", "my-gpt-4o"),
                         help="gateway LLM route: my-gpt-4o (default), apex-claude or apex-open")
+    parser.add_argument("--reset", action="store_true",
+                        help="restart the dispatch container first so the run starts from fresh state")
     args = parser.parse_args()
 
     if args.no_color:
@@ -489,6 +557,8 @@ def main():
         _USE_COLOR = True
 
     started = time.time()
+    if args.reset:
+        reset_container(args.base)
     proxy_url = os.environ.get("KONNECT_PROXY_URL")
     key_dispatch = os.environ.get("KEY_DISPATCH")
     key_supervisor = os.environ.get("KEY_SUPERVISOR")
@@ -546,7 +616,6 @@ def main():
     # 3. ask the model to choose
     step(3, "ask %s to choose a driver per exception" % args.model)
     prompt = build_prompt(exceptions, candidates_by_shipment)
-    allocated = allocate(exceptions, candidates_by_shipment)
     picks = []
     if proxy_url and key_dispatch:
         try:
@@ -564,33 +633,16 @@ def main():
         tokens, method = count_prompt_tokens(prompt)
         note("prompt is %d tokens (%s); budget 5000/min" % (tokens, method))
 
-    # A driver can only take one load: keep the model's pick while the driver is
-    # still free, otherwise fall back to the global allocation for that shipment.
+    # validate the model's picks: one driver per load, cheapest valid match first
     model_picks = {p.get("shipment_id"): p for p in picks if p.get("shipment_id")}
-    by_shipment, used = {}, set()
-    for exception in exceptions:
-        shipment_id = exception["shipment_id"]
-        model_pick = model_picks.get(shipment_id)
-        if model_pick and model_pick.get("new_driver_id") and model_pick["new_driver_id"] not in used:
-            by_shipment[shipment_id] = model_pick
-            used.add(model_pick["new_driver_id"])
-            continue
-        if model_pick:
-            note("%s: model picked %s, already assigned - using allocated driver"
-                 % (shipment_id, model_pick.get("new_driver_id")))
-        fallback = allocated.get(shipment_id)
-        if fallback and fallback["new_driver_id"] not in used:
-            by_shipment[shipment_id] = fallback
-            used.add(fallback["new_driver_id"])
+    if not model_picks:
+        note("no model picks to validate - using the best valid candidate per exception")
+    resolved = resolve_picks(exceptions, candidates_by_shipment, model_picks)
 
     # 4. call the reroute tool
     step(4, "call the reroute tool")
     auto, held = [], []
-    for exception in exceptions:
-        pick = by_shipment.get(exception["shipment_id"])
-        if not pick:
-            note("%s - no pick returned by the model" % exception["shipment_id"])
-            continue
+    for exception, pick, _rejection in resolved:
         proposal = tools.create_reroute(
             exception["shipment_id"], pick["new_driver_id"], pick.get("reason") or "exception recovery"
         )
@@ -636,19 +688,26 @@ def main():
         shipment = held[0]["shipment_id"]
         answer = "y" if args.yes else input("    Dispatcher, approve %s? [y/N] " % target).strip().lower()
         if answer in ("y", "yes"):
-            status, payload = tools.approve(
+            status, payload, tool_count = tools.approve_as_supervisor(
                 target,
                 approver="dispatch-supervisor",
                 note="Dispatcher approved %s for %s" % (target, shipment),
+                mcp_url=mcp_url,
+                supervisor_key=key_supervisor,
             )
-            if status < 400:
-                print("    %sAPPLIED%s %s  by %s" % (GREEN, RESET, target, "dispatch-supervisor"))
-            else:
-                print("    %sapprove failed: %s %s%s" % (RED, status, payload, RESET))
             if not tools.mcp:
-                note("direct mode: no X-API-Key needed locally; through Kong this uses KEY_SUPERVISOR")
+                note("direct mode: one local service, so no separate supervisor session here")
             else:
-                note("KEY_SUPERVISOR=%s (used for this call)" % secret_state("KEY_SUPERVISOR"))
+                note("separate supervisor MCP session; supervisor tool count: %s" % tool_count)
+                if not key_supervisor:
+                    note("%sKEY_SUPERVISOR=MISSING - the supervisor session cannot authenticate%s" % (RED, RESET))
+            if status == "not_found":
+                print("    %sapprove_reroute is not in the supervisor's tool list%s" % (RED, RESET))
+            elif isinstance(status, int) and status < 400:
+                print("    %sAPPLIED%s %s by dispatch-supervisor" % (GREEN, RESET, target))
+            else:
+                print("    %sKong refused the approval: %s%s" % (RED, status, RESET))
+            print("    Kong result: %s" % json.dumps(payload, separators=(",", ":"))[:400])
         else:
             note("not approved - %s stays held" % target)
     else:

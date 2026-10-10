@@ -28,10 +28,14 @@ starts from the 8 original exceptions again. Never touch
    → 16 lines, ending `15/15 checks passed` and `ACCEPTANCE OK`
 
 3. **The story, offline (no gateway needed)**
-   `python3 exception_agent.py --direct --yes`
-   → 8 exceptions, then `AUTO-APPLIED` / `HELD FOR HUMAN` lines with the blocking
-   reasons, one `APPLIED RR-000x by dispatch-supervisor`, and the `/updates` feed.
-   With the shipped data and 55 mph expect **2 auto-applied, 6 held**. Reset after.
+   `python3 exception_agent.py --direct --yes --reset`
+   → `--reset` restarts the container first so **every run starts from fresh state**
+   (identical to `docker restart apex-dispatch`; set `APEX_CONTAINER` to change the
+   name). Then: 8 exceptions, `AUTO-APPLIED` / `HELD FOR HUMAN` lines with the
+   blocking reasons, any `model pick X rejected (reason) -> using Y` lines, one
+   `APPLIED RR-000x by dispatch-supervisor`, and the `/updates` feed. With the
+   shipped data at 55 mph expect **2 auto-applied, 6 held**. Reset after with
+   `docker restart apex-dispatch`.
 
 4. **Through the gateway** (once the Kong tools are applied)
    `source ~/.kong/apextrans-squad-keys.env` (you run this, never Bentley)
