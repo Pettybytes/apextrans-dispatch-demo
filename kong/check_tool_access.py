@@ -7,20 +7,23 @@ the ACLs in the YAML promise.
 
     python3 kong/check_tool_access.py
 
-Keys come from the environment only - nothing is read from a file:
+Keys:
+  * support-bot, dispatch-copilot and compliance-docs keys come from the
+    environment: KEY_SUPPORT, KEY_DISPATCH, KEY_COMPLIANCE.
+  * There is NO supervisor key in the environment. The dispatch-supervisor key
+    is human-only, so it is asked for at a hidden prompt and never read from a
+    file or an env var. Leave it blank to skip that squad.
 
-    KONNECT_PROXY_URL   gateway base URL (default http://localhost:8000)
-    APEX_MCP_URL        MCP endpoint (default $KONNECT_PROXY_URL/apex-dispatch)
-    KEY_SUPPORT         support-bot
-    KEY_DISPATCH        dispatch-copilot
-    KEY_COMPLIANCE      compliance-docs
-    KEY_SUPERVISOR      dispatch-supervisor
+Uses KONNECT_PROXY_URL (default http://localhost:8000) and APEX_MCP_URL
+(default $KONNECT_PROXY_URL/apex-dispatch).
 
-Exits non-zero if any squad's count is wrong, so it can gate a demo.
+A skipped squad is not a failure. Only a wrong tool count, a tool the identity
+should not see, or an ACL that lets a squad through exits non-zero.
 """
 
 from __future__ import annotations
 
+import getpass
 import json
 import os
 import sys
@@ -31,13 +34,12 @@ PROXY = (os.environ.get("KONNECT_PROXY_URL") or "http://localhost:8000").rstrip(
 MCP_URL = os.environ.get("APEX_MCP_URL") or (PROXY + "/apex-dispatch")
 TIMEOUT = int(os.environ.get("APEX_HTTP_TIMEOUT", "30"))
 
-# Identity -> (key env var, expected tool count). The counts match the explicit
-# access.acls.allow lists in kong/apex-dispatch-mcp.yaml.
+# (identity, key env var or None, expected tool count, where the key comes from)
 SQUADS = [
-    ("support-bot", "KEY_SUPPORT", 2),
-    ("dispatch-copilot", "KEY_DISPATCH", 7),
-    ("compliance-docs", "KEY_COMPLIANCE", 2),
-    ("dispatch-supervisor", "KEY_SUPERVISOR", 8),
+    ("support-bot", "KEY_SUPPORT", 2, "env"),
+    ("dispatch-copilot", "KEY_DISPATCH", 7, "env"),
+    ("compliance-docs", "KEY_COMPLIANCE", 2, "env"),
+    ("dispatch-supervisor", None, 8, "prompt"),
 ]
 
 # Tools each identity must NOT be able to see, as a second pair of eyes on the ACLs.
@@ -94,8 +96,8 @@ def rpc(method, params, key, session_id, notify=False, rid=1):
     return status, parse(raw, ctype), (new_session or session_id)
 
 
-def tools_for(identity, key):
-    """Handshake, then return this identity's visible tool names."""
+def open_session(key):
+    """Handshake once and return (session_id, tool names)."""
     status, body, session = rpc("initialize", {
         "protocolVersion": "2024-11-05",
         "capabilities": {},
@@ -110,41 +112,92 @@ def tools_for(identity, key):
     if isinstance(body, dict) and body.get("error"):
         raise RuntimeError("tools/list -> %s" % body["error"])
     result = (body or {}).get("result") or {}
-    return [t.get("name") for t in result.get("tools", []) if t.get("name")]
+    return session, [t.get("name") for t in result.get("tools", []) if t.get("name")]
+
+
+def print_refusal(identity, key, session, tool, arguments):
+    """Ask for a tool this identity must not have, and print Kong's answer.
+
+    Returns True when Kong refused, which is what we want to see.
+    """
+    status, body, _ = rpc("tools/call", {"name": tool, "arguments": arguments}, key, session, rid=4)
+    detail = json.dumps(body)[:180] if isinstance(body, (dict, list)) else str(body)[:180]
+    if status >= 400:
+        print("        Kong refused %s for %s: HTTP %s %s" % (tool, identity, status, detail))
+        return True
+    print("        *** ACL HOLE: %s was allowed to call %s - %s ***" % (identity, tool, detail))
+    return False
+
+
+def resolve_key(identity, key_name, source):
+    """Return (key, skip_reason). A blank reason means we have a key."""
+    if source == "prompt":
+        # The supervisor key is human-only: never read from the environment.
+        if not sys.stdin.isatty():
+            return None, "human key not entered"
+        try:
+            entered = getpass.getpass("    Paste the %s key (blank to skip): " % identity).strip()
+        except (EOFError, KeyboardInterrupt):
+            return None, "human key not entered"
+        if not entered:
+            return None, "human key not entered"
+        return entered, ""
+    key = os.environ.get(key_name or "")
+    if not key:
+        return None, "%s is not set" % key_name
+    return key, ""
 
 
 def main():
     print("MCP endpoint: %s" % MCP_URL)
     print("expected: support-bot 2, dispatch-copilot 7, compliance-docs 2, dispatch-supervisor 8\n")
-    failures = 0
-    for identity, key_name, expected in SQUADS:
-        key = os.environ.get(key_name)
+
+    checked = passed = skipped = failed = 0
+    skip_reasons = []
+
+    for identity, key_name, expected, source in SQUADS:
+        key, reason = resolve_key(identity, key_name, source)
         if not key:
-            print("SKIP  %-20s %s is not set" % (identity, key_name))
-            failures += 1
+            print("SKIP  %-20s %s" % (identity, reason))
+            skipped += 1
+            skip_reasons.append(reason)
             continue
+
+        checked += 1
         try:
-            names = tools_for(identity, key)
+            session, names = open_session(key)
         except Exception as exc:
             print("FAIL  %-20s %s" % (identity, exc))
-            failures += 1
+            failed += 1
             continue
 
-        ok = len(names) == expected
         forbidden = [t for t in MUST_NOT_SEE.get(identity, []) if t in names]
-        verdict = "OK  " if (ok and not forbidden) else "FAIL"
-        if not ok or forbidden:
-            failures += 1
-        print("%s  %-20s %d of %d tools" % (verdict, identity, len(names), expected))
+        squad_ok = len(names) == expected and not forbidden
+        print("%s  %-20s %d of %d tools" % ("OK  " if squad_ok else "FAIL", identity, len(names), expected))
         if forbidden:
             print("        must not see: %s" % ", ".join(forbidden))
-        print("        %s" % ", ".join(sorted(names)) if names else "        (none)")
+        print("        %s" % (", ".join(sorted(names)) if names else "(none)"))
 
-    print()
-    if failures:
-        print("%d squad(s) need attention." % failures)
+        if identity == "support-bot":
+            refused = print_refusal(identity, key, session, "create_reroute", {
+                "body": {"shipment_id": "APX-2610149", "new_driver_id": "DRV-1001",
+                         "reason": "acl check", "requested_by": "check_tool_access"},
+            })
+            squad_ok = squad_ok and refused
+
+        if squad_ok:
+            passed += 1
+        else:
+            failed += 1
+
+    tail = ""
+    if skipped:
+        tail = " (%s)" % "; ".join(dict.fromkeys(skip_reasons))
+    print("\n%d checked, %d OK, %d skipped%s" % (checked, passed, skipped, tail))
+
+    if failed:
+        print("%d squad(s) need attention." % failed)
         return 1
-    print("All four squads see exactly what the ACLs promise.")
     return 0
 
 
