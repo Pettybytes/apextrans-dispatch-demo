@@ -1,45 +1,121 @@
-driver_id,name,home_terminal,current_terminal,current_city,status,hos_hours_left,endorsements,equipment,safety_score,phone
-DRV-1001,Malik Holloway,CHI,CHI,"Chicago, IL",Available,9.3,None,Dry Van 53ft,91,(555) 460-1571
-DRV-1002,Dana Reyes,MEM,MEM,"Memphis, TN",Available,9.0,Reefer-certified,Reefer 53ft,89,(555) 677-9403
-DRV-1003,Luis Brandt,DAL,DAL,"Dallas, TX",Available,9.2,None,Flatbed 48ft,97,(555) 801-8693
-DRV-1004,Keisha Okafor,DEN,DEN,"Denver, CO",Available,7.9,Hazmat,Dry Van 53ft,90,(555) 777-3425
-DRV-1005,Tom Sullivan,ATL,ATL,"Atlanta, GA",Available,8.4,Reefer-certified,Reefer 53ft,88,(555) 578-6424
-DRV-1006,Priya Natarajan,KCK,KCK,"Kansas City, KS",Available,9.3,Hazmat,Dry Van 53ft,91,(555) 390-5014
-DRV-1007,Andre Fields,STL,STL,"St. Louis, MO",Available,7.7,None,Flatbed 48ft,92,(555) 673-9012
-DRV-1008,Rosa Castillo,NSH,NSH,"Nashville, TN",Available,8.7,None,Dry Van 53ft,97,(555) 289-1557
-DRV-1009,Jamal Wright,PHX,PHX,"Phoenix, AZ",Available,8.7,Reefer-certified,Reefer 53ft,89,(555) 799-4726
-DRV-1010,Erin Lindqvist,HAR,HAR,"Harrisburg, PA",Available,9.1,Hazmat,Dry Van 53ft,87,(555) 410-9755
-DRV-1011,Victor Morales,MSP,NSH,"Nashville, TN",Off Duty,0.0,None,Dry Van 53ft,99,(555) 601-3010
-DRV-1012,Mei Chen,KCK,HAR,"Harrisburg, PA",On Load,6.7,None,Dry Van 53ft,90,(555) 843-1357
-DRV-1013,Darnell Baptiste,COL,IND,"Indianapolis, IN",On Load,5.2,None,Reefer 53ft,95,(555) 260-3145
-DRV-1014,Sofia Ivanova,DET,IND,"Indianapolis, IN",On Load,6.4,None,Reefer 53ft,94,(555) 769-1263
-DRV-1015,Hank Pruitt,CHI,MEM,"Memphis, TN",On Load,7.2,Reefer-certified,Flatbed 48ft,89,(555) 776-7879
-DRV-1016,Tasha Greene,DET,MEM,"Memphis, TN",On Load,3.9,Reefer-certified,Flatbed 48ft,87,(555) 242-5811
-DRV-1017,Omar Haddad,STL,CLE,"Cleveland, OH",On Load,9.8,None,Flatbed 48ft,88,(555) 261-3139
-DRV-1018,Lena Kowalski,OAK,MSP,"Minneapolis, MN",On Load,4.0,Reefer-certified,Dry Van 53ft,87,(555) 394-8868
-DRV-1019,Curtis Dunbar,ABQ,SLC,"Salt Lake City, UT",On Load,5.1,Hazmat,Flatbed 48ft,90,(555) 641-4971
-DRV-1020,Ana Ferreira,HOU,DEN,"Denver, CO",Off Duty,0.0,Reefer-certified,Dry Van 53ft,84,(555) 589-7528
-DRV-1021,Rick Tate,STL,CHI,"Chicago, IL",Off Duty,0.0,None,Reefer 53ft,91,(555) 510-9774
-DRV-1022,Nia Mensah,PHX,SEA,"Seattle, WA",On Load,2.1,Hazmat,Reefer 53ft,91,(555) 205-7393
-DRV-1023,Grant Albright,MSP,KCK,"Kansas City, KS",On Load,9.0,None,Dry Van 53ft,99,(555) 226-5229
-DRV-1024,Yolanda Vance,COL,SLC,"Salt Lake City, UT",On Load,8.0,Hazmat,Flatbed 48ft,86,(555) 623-4320
-DRV-1025,Ben Ortiz,CHI,LAX,"Los Angeles, CA",On Load,4.3,Hazmat,Dry Van 53ft,93,(555) 718-2796
-DRV-1026,Carla Kim,COL,NSH,"Nashville, TN",On Break,0.0,Hazmat,Flatbed 48ft,87,(555) 544-4847
-DRV-1027,Eddie Doyle,STL,PHX,"Phoenix, AZ",On Load,5.3,Reefer-certified,Flatbed 48ft,91,(555) 364-5537
-DRV-1028,Fatima Rahman,MSP,NSH,"Nashville, TN",On Load,4.2,None,Reefer 53ft,85,(555) 643-8947
-DRV-1029,Glen Becker,DAL,IND,"Indianapolis, IN",On Load,6.9,None,Reefer 53ft,87,(555) 631-6836
-DRV-1030,Ivy Nguyen,CLE,SEA,"Seattle, WA",On Load,5.0,None,Dry Van 53ft,97,(555) 850-8241
-DRV-1031,Wes Hart,IND,STL,"St. Louis, MO",On Load,10.0,Hazmat,Flatbed 48ft,87,(555) 339-5911
-DRV-1032,Jo Silva,LAX,DAL,"Dallas, TX",On Load,6.4,None,Reefer 53ft,98,(555) 327-6751
-DRV-1033,Kofi Asante,SEA,DET,"Detroit, MI",On Load,2.1,None,Flatbed 48ft,86,(555) 689-2892
-DRV-1034,Lars Berg,CLE,HAR,"Harrisburg, PA",On Break,0.0,Reefer-certified,Dry Van 53ft,89,(555) 864-7510
-DRV-1035,Maya Patel,JAX,IND,"Indianapolis, IN",On Load,6.3,None,Reefer 53ft,95,(555) 400-1007
-DRV-1036,Nate Russo,DAL,OAK,"Oakland, CA",On Load,4.3,None,Dry Van 53ft,94,(555) 676-5016
-DRV-1037,Opal Quist,DEN,CLT,"Charlotte, NC",On Load,6.5,Hazmat,Flatbed 48ft,89,(555) 371-8611
-DRV-1038,Pete Novak,PHX,HOU,"Houston, TX",Off Duty,0.0,Reefer-certified,Flatbed 48ft,89,(555) 343-7139
-DRV-1039,Quinn Shaw,NWK,CLT,"Charlotte, NC",On Load,3.2,None,Flatbed 48ft,87,(555) 887-3645
-DRV-1040,Ray Bishop,PHX,KCK,"Kansas City, KS",On Load,7.9,Hazmat,Dry Van 53ft,89,(555) 468-1356
-DRV-1041,Sam Park,DAL,KCK,"Kansas City, KS",On Load,2.2,Hazmat,Flatbed 48ft,90,(555) 755-1831
-DRV-1042,Tia Diallo,DEN,NSH,"Nashville, TN",On Load,7.5,Reefer-certified,Flatbed 48ft,90,(555) 848-3667
-DRV-1043,Uma Iyer,HOU,ABQ,"Albuquerque, NM",On Load,2.9,Hazmat,Reefer 53ft,93,(555) 586-4830
-DRV-1044,Zeke Frost,HOU,ABQ,"Albuquerque, NM",On Load,3.0,None,Reefer 53ft,85,(555) 250-3007
+driver_id,name,home_terminal,current_terminal,current_city,status,drive_hours_used_today,on_duty_window_used,hours_since_last_break,cycle_hours_used_8d,last_10h_reset_utc,endorsements,equipment,truck_id,safety_score,phone
+DRV-1001,Malik Holloway,CHI,CHI,"Chicago, IL",Available,1.5,4.0,2.0,32.0,2026-10-13T21:42Z,None,Dry Van 53ft,TRK-1001,91,(555) 460-1571
+DRV-1002,Dana Reyes,MEM,MEM,"Memphis, TN",Available,6.0,8.0,3.0,41.0,2026-10-14T09:18Z,Reefer-certified,Reefer 53ft,TRK-1002,89,(555) 677-9403
+DRV-1003,Luis Brandt,DAL,DAL,"Dallas, TX",Available,1.5,3.5,1.0,22.0,2026-10-13T20:54Z,None,Flatbed 48ft,TRK-1003,97,(555) 801-8693
+DRV-1004,Keisha Okafor,DEN,DEN,"Denver, CO",Available,9.0,11.0,9.0,58.0,2026-10-13T20:00Z,Hazmat,Dry Van 53ft,TRK-1004,90,(555) 777-3425
+DRV-1005,Tom Sullivan,ATL,ATL,"Atlanta, GA",Available,3.0,5.0,2.5,26.0,2026-10-14T00:36Z,Reefer-certified,Reefer 53ft,TRK-1005,88,(555) 578-6424
+DRV-1006,Priya Natarajan,KCK,KCK,"Kansas City, KS",Available,8.5,10.5,4.0,63.0,2026-10-14T06:06Z,Hazmat,Dry Van 53ft,TRK-1006,91,(555) 390-5014
+DRV-1007,Andre Fields,STL,STL,"St. Louis, MO",Available,7.5,9.0,8.5,44.0,2026-10-14T05:30Z,None,Flatbed 48ft,TRK-1007,92,(555) 673-9012
+DRV-1008,Rosa Castillo,NSH,NSH,"Nashville, TN",Available,4.0,6.0,3.0,30.0,2026-10-14T01:54Z,None,Dry Van 53ft,TRK-1008,97,(555) 289-1557
+DRV-1009,Jamal Wright,PHX,PHX,"Phoenix, AZ",Available,2.0,5.0,2.0,40.0,2026-10-13T20:18Z,Reefer-certified,Reefer 53ft,TRK-1009,89,(555) 799-4726
+DRV-1010,Erin Lindqvist,HAR,HAR,"Harrisburg, PA",Available,2.0,4.0,1.5,18.0,2026-10-13T17:24Z,Hazmat,Dry Van 53ft,TRK-1010,87,(555) 410-9755
+DRV-1011,Victor Morales,MSP,NSH,"Nashville, TN",Off Duty,4.6,6.2,4.2,21.3,2026-10-14T11:42Z,None,Dry Van 53ft,TRK-1011,99,(555) 601-3010
+DRV-1012,Mei Chen,KCK,HAR,"Harrisburg, PA",On Load,8.8,11.8,9.3,36.2,2026-10-13T23:54Z,None,Dry Van 53ft,TRK-1012,90,(555) 843-1357
+DRV-1013,Darnell Baptiste,COL,IND,"Indianapolis, IN",On Load,6.6,8.2,2.5,31.0,2026-10-14T08:48Z,None,Reefer 53ft,TRK-1013,95,(555) 260-3145
+DRV-1014,Sofia Ivanova,DET,IND,"Indianapolis, IN",On Load,0.8,2.5,1.1,10.3,2026-10-13T19:06Z,None,Reefer 53ft,TRK-1014,94,(555) 769-1263
+DRV-1015,Hank Pruitt,CHI,MEM,"Memphis, TN",On Load,0.5,2.0,8.8,61.4,2026-10-13T16:36Z,Reefer-certified,Flatbed 48ft,TRK-1015,89,(555) 776-7879
+DRV-1016,Tasha Greene,DET,MEM,"Memphis, TN",On Load,0.9,4.7,1.4,55.7,2026-10-13T16:18Z,Reefer-certified,Flatbed 48ft,TRK-1016,87,(555) 242-5811
+DRV-1017,Omar Haddad,STL,CLE,"Cleveland, OH",On Load,7.7,11.1,3.4,28.0,2026-10-13T22:30Z,None,Flatbed 48ft,TRK-1017,88,(555) 261-3139
+DRV-1018,Lena Kowalski,OAK,MSP,"Minneapolis, MN",On Load,1.4,2.6,9.0,37.2,2026-10-14T12:54Z,Reefer-certified,Dry Van 53ft,TRK-1018,87,(555) 394-8868
+DRV-1019,Curtis Dunbar,ABQ,SLC,"Salt Lake City, UT",On Load,10.4,11.8,0.8,38.5,2026-10-13T20:42Z,Hazmat,Flatbed 48ft,TRK-1019,90,(555) 641-4971
+DRV-1020,Ana Ferreira,HOU,DEN,"Denver, CO",Off Duty,5.2,6.0,3.4,20.8,2026-10-14T10:36Z,Reefer-certified,Dry Van 53ft,TRK-1020,84,(555) 589-7528
+DRV-1021,Rick Tate,STL,CHI,"Chicago, IL",Off Duty,6.0,9.8,0.2,4.6,2026-10-13T21:24Z,None,Reefer 53ft,TRK-1021,91,(555) 510-9774
+DRV-1022,Nia Mensah,PHX,SEA,"Seattle, WA",On Load,2.3,3.9,2.2,67.5,2026-10-14T07:06Z,Hazmat,Reefer 53ft,TRK-1022,91,(555) 205-7393
+DRV-1023,Grant Albright,MSP,KCK,"Kansas City, KS",On Load,2.2,3.0,6.9,41.5,2026-10-14T07:54Z,None,Dry Van 53ft,TRK-1023,99,(555) 226-5229
+DRV-1024,Yolanda Vance,COL,SLC,"Salt Lake City, UT",On Load,7.5,9.3,5.0,20.6,2026-10-14T09:48Z,Hazmat,Flatbed 48ft,TRK-1024,86,(555) 623-4320
+DRV-1025,Ben Ortiz,CHI,LAX,"Los Angeles, CA",On Load,8.2,9.5,0.2,33.1,2026-10-14T00:42Z,Hazmat,Dry Van 53ft,TRK-1025,93,(555) 718-2796
+DRV-1026,Carla Kim,COL,NSH,"Nashville, TN",On Break,5.0,7.6,6.3,48.9,2026-10-14T12:48Z,Hazmat,Flatbed 48ft,TRK-1026,87,(555) 544-4847
+DRV-1027,Eddie Doyle,STL,PHX,"Phoenix, AZ",On Load,9.2,13.2,7.5,20.9,2026-10-13T19:24Z,Reefer-certified,Flatbed 48ft,TRK-1027,91,(555) 364-5537
+DRV-1028,Fatima Rahman,MSP,NSH,"Nashville, TN",On Load,8.4,9.2,7.5,35.5,2026-10-14T05:12Z,None,Reefer 53ft,TRK-1028,85,(555) 643-8947
+DRV-1029,Glen Becker,DAL,IND,"Indianapolis, IN",On Load,6.2,10.2,4.0,22.3,2026-10-14T02:42Z,None,Reefer 53ft,TRK-1029,87,(555) 631-6836
+DRV-1030,Ivy Nguyen,CLE,SEA,"Seattle, WA",On Load,4.2,5.5,9.2,23.9,2026-10-14T04:48Z,None,Dry Van 53ft,TRK-1030,97,(555) 850-8241
+DRV-1031,Wes Hart,IND,STL,"St. Louis, MO",On Load,1.1,2.4,5.5,57.1,2026-10-14T09:24Z,Hazmat,Flatbed 48ft,TRK-1031,87,(555) 339-5911
+DRV-1032,Jo Silva,LAX,DAL,"Dallas, TX",On Load,8.1,10.0,9.5,58.4,2026-10-14T06:12Z,None,Reefer 53ft,TRK-1032,98,(555) 327-6751
+DRV-1033,Kofi Asante,SEA,DET,"Detroit, MI",On Load,2.9,4.2,4.1,8.7,2026-10-14T01:24Z,None,Flatbed 48ft,TRK-1033,86,(555) 689-2892
+DRV-1034,Lars Berg,CLE,HAR,"Harrisburg, PA",On Break,4.1,4.8,7.4,15.0,2026-10-14T04:12Z,Reefer-certified,Dry Van 53ft,TRK-1034,89,(555) 864-7510
+DRV-1035,Maya Patel,JAX,IND,"Indianapolis, IN",On Load,9.4,11.0,2.1,24.6,2026-10-13T19:12Z,None,Reefer 53ft,TRK-1035,95,(555) 400-1007
+DRV-1036,Nate Russo,DAL,OAK,"Oakland, CA",On Load,1.1,2.5,4.4,16.0,2026-10-13T17:30Z,None,Dry Van 53ft,TRK-1036,94,(555) 676-5016
+DRV-1037,Opal Quist,DEN,CLT,"Charlotte, NC",On Load,6.1,7.3,1.1,41.3,2026-10-14T00:06Z,Hazmat,Flatbed 48ft,TRK-1037,89,(555) 371-8611
+DRV-1038,Pete Novak,PHX,HOU,"Houston, TX",Off Duty,8.8,11.6,4.4,42.0,2026-10-13T21:24Z,Reefer-certified,Flatbed 48ft,TRK-1038,89,(555) 343-7139
+DRV-1039,Quinn Shaw,NWK,CLT,"Charlotte, NC",On Load,9.6,10.4,3.3,40.1,2026-10-14T09:24Z,None,Flatbed 48ft,TRK-1039,87,(555) 887-3645
+DRV-1040,Ray Bishop,PHX,KCK,"Kansas City, KS",On Load,3.4,6.1,1.9,43.8,2026-10-14T10:36Z,Hazmat,Dry Van 53ft,TRK-1040,89,(555) 468-1356
+DRV-1041,Sam Park,DAL,KCK,"Kansas City, KS",On Load,1.7,3.3,5.1,10.4,2026-10-14T06:42Z,Hazmat,Flatbed 48ft,TRK-1041,90,(555) 755-1831
+DRV-1042,Tia Diallo,DEN,NSH,"Nashville, TN",On Load,7.8,10.6,7.2,39.5,2026-10-14T12:06Z,Reefer-certified,Flatbed 48ft,TRK-1042,90,(555) 848-3667
+DRV-1043,Uma Iyer,HOU,ABQ,"Albuquerque, NM",On Load,4.6,6.9,3.9,67.4,2026-10-13T23:42Z,Hazmat,Reefer 53ft,TRK-1043,93,(555) 586-4830
+DRV-1044,Zeke Frost,HOU,ABQ,"Albuquerque, NM",On Load,1.9,4.6,4.8,29.8,2026-10-14T00:06Z,None,Reefer 53ft,TRK-1044,85,(555) 250-3007
+DRV-1045,Marcus Reed,STL,STL,"St. Louis, MO",Available,2.2,5.4,1.6,37.5,2026-10-14T02:24Z,None,Dry Van 53ft,TRK-1045,78,(555) 801-4765
+DRV-1046,Elena Vasquez,ABQ,ABQ,"Albuquerque, NM",Available,6.5,8.0,3.8,25.2,2026-10-13T17:24Z,None,Reefer 53ft,TRK-1046,90,(555) 806-1063
+DRV-1047,Dwayne Carter,ELP,ELP,"El Paso, TX",Available,5.9,6.9,3.1,25.6,2026-10-14T04:00Z,"Hazmat,TWIC",Flatbed 48ft,TRK-1047,92,(555) 284-3813
+DRV-1048,Ingrid Halvorsen,DAL,DAL,"Dallas, TX",Available,8.9,9.5,4.3,22.7,2026-10-14T07:48Z,TWIC,Flatbed 48ft,TRK-1048,81,(555) 407-3053
+DRV-1049,Tobias Grant,SAT,SAT,"San Antonio, TX",Available,6.5,8.7,5.6,15.5,2026-10-13T19:54Z,Reefer-certified,Dry Van 53ft,TRK-1049,81,(555) 379-3933
+DRV-1050,Yusuf Demir,HOU,HOU,"Houston, TX",Available,4.4,5.1,7.0,51.5,2026-10-14T05:00Z,"Reefer-certified,Tanker",Reefer 53ft,TRK-1050,78,(555) 768-1968
+DRV-1051,Camille Rousseau,SLC,SLC,"Salt Lake City, UT",Available,6.4,8.0,2.4,15.0,2026-10-14T02:42Z,TWIC,Reefer 53ft,TRK-1051,77,(555) 844-6037
+DRV-1052,Hector Salinas,HOU,HOU,"Houston, TX",Available,6.4,7.0,0.4,67.0,2026-10-14T07:00Z,None,Flatbed 48ft,TRK-1052,91,(555) 974-3095
+DRV-1053,Nadia Petrova,LAX,LAX,"Los Angeles, CA",Available,2.7,3.4,6.0,30.2,2026-10-14T10:18Z,Hazmat,Flatbed 48ft,TRK-1053,94,(555) 348-8482
+DRV-1054,Owen Brady,ATL,ATL,"Atlanta, GA",Available,0.3,0.8,4.1,28.2,2026-10-13T17:36Z,"Hazmat,TWIC",Reefer 53ft,TRK-1054,94,(555) 584-9321
+DRV-1055,Fatima Rahman,OAK,OAK,"Oakland, CA",Available,0.8,4.0,1.1,25.5,2026-10-14T10:18Z,Reefer-certified,Dry Van 53ft,TRK-1055,88,(555) 563-4665
+DRV-1056,Lukas Meyer,CHI,CHI,"Chicago, IL",Available,0.7,2.3,6.5,30.7,2026-10-14T04:36Z,TWIC,Dry Van 53ft,TRK-1056,78,(555) 760-9508
+DRV-1057,Rene Duplantis,HOU,HOU,"Houston, TX",Available,8.4,11.5,6.7,13.3,2026-10-14T09:00Z,Reefer-certified,Dry Van 53ft,TRK-1057,79,(555) 593-7015
+DRV-1058,Sasha Kowalski,SAT,SAT,"San Antonio, TX",Available,1.6,2.7,4.0,66.0,2026-10-14T04:42Z,None,Dry Van 53ft,TRK-1058,80,(555) 903-8767
+DRV-1059,Grace Wambui,NWK,NWK,"Newark, NJ",Available,5.9,8.2,4.6,58.4,2026-10-14T13:00Z,TWIC,Dry Van 53ft,TRK-1059,76,(555) 639-9953
+DRV-1060,Diego Marchetti,ABQ,ABQ,"Albuquerque, NM",Available,2.6,5.9,0.3,53.5,2026-10-13T23:36Z,"Reefer-certified,Tanker",Dry Van 53ft,TRK-1060,92,(555) 237-5430
+DRV-1061,Aisha Bello,DEN,DEN,"Denver, CO",Available,2.5,5.3,4.9,33.2,2026-10-14T04:18Z,Reefer-certified,Dry Van 53ft,TRK-1061,95,(555) 637-1333
+DRV-1062,Karl Lindgren,DAL,DAL,"Dallas, TX",Available,2.4,4.2,3.3,56.3,2026-10-14T02:00Z,TWIC,Reefer 53ft,TRK-1062,88,(555) 754-5251
+DRV-1063,Priscilla Okafor,PDX,PDX,"Portland, OR",Available,8.1,11.0,5.0,38.2,2026-10-13T23:18Z,"Reefer-certified,Tanker",Flatbed 48ft,TRK-1063,91,(555) 409-4248
+DRV-1064,Viktor Novak,DET,DET,"Detroit, MI",Available,7.3,10.5,6.8,10.8,2026-10-14T10:18Z,Tanker,Reefer 53ft,TRK-1064,82,(555) 633-9293
+DRV-1065,Marisol Vega,JAX,JAX,"Jacksonville, FL",Off Duty,1.8,5.6,9.3,20.6,2026-10-14T02:00Z,Tanker,Flatbed 48ft,TRK-1065,79,(555) 315-2958
+DRV-1066,Desmond Clarke,KCK,KCK,"Kansas City, KS",On Load,10.4,11.1,1.0,66.4,2026-10-14T03:42Z,Reefer-certified,Reefer 53ft,TRK-1066,83,(555) 711-6063
+DRV-1067,Anika Sharma,NSH,NSH,"Nashville, TN",On Break,4.0,5.2,2.5,10.1,2026-10-14T09:06Z,None,Dry Van 53ft,TRK-1067,95,(555) 631-4810
+DRV-1068,Bruno Almeida,HOU,HOU,"Houston, TX",On Load,4.8,6.9,7.1,51.3,2026-10-13T18:36Z,"Reefer-certified,Tanker",Dry Van 53ft,TRK-1068,78,(555) 552-8272
+DRV-1069,Tessa Nguyen,HOU,HOU,"Houston, TX",Off Duty,8.2,9.4,7.8,10.1,2026-10-13T22:30Z,None,Flatbed 48ft,TRK-1069,94,(555) 247-3316
+DRV-1070,Reuben Osei,MEM,MEM,"Memphis, TN",Off Duty,6.2,9.3,7.2,24.8,2026-10-14T08:24Z,Reefer-certified,Flatbed 48ft,TRK-1070,86,(555) 463-2661
+DRV-1071,Lidia Kowalczyk,MSY,MSY,"New Orleans, LA",On Load,3.7,5.1,5.1,59.0,2026-10-13T21:42Z,None,Reefer 53ft,TRK-1071,88,(555) 503-7198
+DRV-1072,Soren Bjorklund,JAX,JAX,"Jacksonville, FL",On Load,4.2,6.9,1.6,14.8,2026-10-13T19:06Z,Tanker,Dry Van 53ft,TRK-1072,89,(555) 769-2961
+DRV-1073,Hana Takahashi,COL,COL,"Columbus, OH",Off Duty,0.2,3.7,4.2,4.4,2026-10-13T16:12Z,Tanker,Reefer 53ft,TRK-1073,90,(555) 441-9064
+DRV-1074,Malcolm Reyes,STL,STL,"St. Louis, MO",On Load,0.5,3.0,2.1,63.2,2026-10-13T17:12Z,TWIC,Dry Van 53ft,TRK-1074,87,(555) 674-4976
+DRV-1075,Petra Silva,NSH,NSH,"Nashville, TN",On Break,7.9,9.1,2.6,29.3,2026-10-14T07:24Z,"Reefer-certified,Tanker",Dry Van 53ft,TRK-1075,82,(555) 288-1395
+DRV-1076,Emeka Adeyemi,HOU,HOU,"Houston, TX",On Load,10.1,10.6,2.1,16.5,2026-10-13T23:30Z,Tanker,Reefer 53ft,TRK-1076,91,(555) 672-2171
+DRV-1077,Clara Fontaine,NSH,NSH,"Nashville, TN",On Load,1.0,2.7,8.8,16.5,2026-10-14T06:48Z,"Hazmat,TWIC",Reefer 53ft,TRK-1077,87,(555) 205-3622
+DRV-1078,Rustam Karimov,PHX,PHX,"Phoenix, AZ",Off Duty,5.8,7.3,0.1,17.7,2026-10-14T10:24Z,"Reefer-certified,Tanker",Reefer 53ft,TRK-1078,94,(555) 423-1733
+DRV-1079,Bianca Rossi,KCK,KCK,"Kansas City, KS",On Load,5.7,7.2,6.4,6.8,2026-10-14T12:06Z,None,Reefer 53ft,TRK-1079,89,(555) 733-2901
+DRV-1080,Neil Fairbanks,STL,STL,"St. Louis, MO",Off Duty,4.9,6.1,1.1,36.4,2026-10-14T06:18Z,Reefer-certified,Flatbed 48ft,TRK-1080,83,(555) 312-6880
+DRV-1081,Zoe Whitfield,SLC,SLC,"Salt Lake City, UT",On Load,0.0,1.3,7.2,19.3,2026-10-13T16:12Z,None,Flatbed 48ft,TRK-1081,80,(555) 735-3945
+DRV-1082,Amir Haddad,MEM,MEM,"Memphis, TN",On Load,7.9,10.4,9.2,35.1,2026-10-13T21:54Z,None,Dry Van 53ft,TRK-1082,98,(555) 216-6665
+DRV-1083,Lucia Herrera,MSY,MSY,"New Orleans, LA",On Load,0.4,2.3,3.3,40.0,2026-10-13T21:42Z,Tanker,Flatbed 48ft,TRK-1083,80,(555) 979-7806
+DRV-1084,Curtis Boyd,PDX,PDX,"Portland, OR",On Load,2.5,4.8,4.6,13.3,2026-10-13T21:00Z,Tanker,Dry Van 53ft,TRK-1084,86,(555) 302-8565
+DRV-1085,Marcus Reed 2,OAK,OAK,"Oakland, CA",Off Duty,4.3,6.7,7.9,36.3,2026-10-13T16:48Z,None,Reefer 53ft,TRK-1085,89,(555) 202-7881
+DRV-1086,Elena Vasquez 2,JAX,JAX,"Jacksonville, FL",On Load,9.8,11.3,8.6,45.6,2026-10-13T21:00Z,TWIC,Flatbed 48ft,TRK-1086,95,(555) 701-5714
+DRV-1087,Dwayne Carter 2,BUF,BUF,"Buffalo, NY",On Load,8.6,10.8,2.6,54.3,2026-10-14T12:36Z,TWIC,Dry Van 53ft,TRK-1087,77,(555) 702-2748
+DRV-1088,Ingrid Halvorsen 2,JAX,JAX,"Jacksonville, FL",Off Duty,7.6,8.7,1.4,62.3,2026-10-14T10:42Z,"Reefer-certified,Tanker",Reefer 53ft,TRK-1088,93,(555) 821-7381
+DRV-1089,Tobias Grant 2,CLE,CLE,"Cleveland, OH",On Load,8.5,11.0,4.2,50.9,2026-10-14T06:42Z,Tanker,Dry Van 53ft,TRK-1089,76,(555) 290-3948
+DRV-1090,Yusuf Demir 2,COL,COL,"Columbus, OH",Off Duty,4.8,8.6,6.1,12.4,2026-10-14T10:06Z,Tanker,Reefer 53ft,TRK-1090,93,(555) 278-7929
+DRV-1091,Camille Rousseau 2,ATL,ATL,"Atlanta, GA",On Load,1.2,4.5,7.6,38.8,2026-10-14T02:30Z,TWIC,Dry Van 53ft,TRK-1091,97,(555) 825-3212
+DRV-1092,Hector Salinas 2,DET,DET,"Detroit, MI",Off Duty,1.5,3.3,4.5,28.6,2026-10-13T17:06Z,None,Dry Van 53ft,TRK-1092,84,(555) 427-8860
+DRV-1093,Nadia Petrova 2,ATL,ATL,"Atlanta, GA",Off Duty,2.8,5.0,7.4,45.3,2026-10-14T03:54Z,"Hazmat,TWIC",Reefer 53ft,TRK-1093,99,(555) 372-4759
+DRV-1094,Owen Brady 2,HOU,HOU,"Houston, TX",On Load,1.5,5.5,0.3,9.7,2026-10-13T18:36Z,Reefer-certified,Flatbed 48ft,TRK-1094,88,(555) 815-8245
+DRV-1095,Fatima Rahman 2,DEN,DEN,"Denver, CO",On Load,2.1,5.6,7.6,6.3,2026-10-14T10:54Z,Reefer-certified,Reefer 53ft,TRK-1095,90,(555) 225-7414
+DRV-1096,Lukas Meyer 2,SAT,SAT,"San Antonio, TX",On Load,10.1,10.9,6.6,38.7,2026-10-13T18:30Z,TWIC,Dry Van 53ft,TRK-1096,81,(555) 726-7278
+DRV-1097,Rene Duplantis 2,STL,STL,"St. Louis, MO",On Load,7.0,8.2,8.2,61.6,2026-10-13T23:48Z,TWIC,Dry Van 53ft,TRK-1097,92,(555) 970-6668
+DRV-1098,Sasha Kowalski 2,IND,IND,"Indianapolis, IN",On Load,4.2,7.9,7.8,4.6,2026-10-14T06:12Z,None,Flatbed 48ft,TRK-1098,95,(555) 797-6649
+DRV-1099,Grace Wambui 2,KCK,KCK,"Kansas City, KS",On Load,9.8,11.4,8.9,61.2,2026-10-14T10:00Z,"Hazmat,TWIC",Flatbed 48ft,TRK-1099,98,(555) 812-1080
+DRV-1100,Diego Marchetti 2,MSP,MSP,"Minneapolis, MN",Off Duty,3.5,6.3,6.1,39.1,2026-10-14T03:54Z,Tanker,Flatbed 48ft,TRK-1100,88,(555) 976-3545
+DRV-1101,Aisha Bello 2,KCK,KCK,"Kansas City, KS",On Load,8.0,11.1,4.7,51.5,2026-10-14T12:48Z,Tanker,Reefer 53ft,TRK-1101,99,(555) 504-9023
+DRV-1102,Karl Lindgren 2,COL,COL,"Columbus, OH",Off Duty,5.7,7.1,7.1,63.1,2026-10-14T09:18Z,Hazmat,Flatbed 48ft,TRK-1102,92,(555) 423-8807
+DRV-1103,Priscilla Okafor 2,TUL,TUL,"Tulsa, OK",On Load,9.7,10.5,6.3,50.3,2026-10-13T23:42Z,TWIC,Flatbed 48ft,TRK-1103,81,(555) 505-9061
+DRV-1104,Viktor Novak 2,DAL,DAL,"Dallas, TX",On Break,5.6,7.8,1.1,54.3,2026-10-14T11:06Z,Tanker,Dry Van 53ft,TRK-1104,98,(555) 960-8816
+DRV-1105,Marisol Vega 2,LAX,LAX,"Los Angeles, CA",On Load,8.0,11.7,6.8,43.3,2026-10-13T23:06Z,"Hazmat,TWIC",Dry Van 53ft,TRK-1105,83,(555) 436-2564
+DRV-1106,Desmond Clarke 2,DET,DET,"Detroit, MI",On Load,1.1,2.9,7.5,36.2,2026-10-13T20:54Z,Hazmat,Reefer 53ft,TRK-1106,94,(555) 602-7873
+DRV-1107,Anika Sharma 2,HOU,HOU,"Houston, TX",Off Duty,4.7,6.2,1.5,31.2,2026-10-13T20:36Z,None,Dry Van 53ft,TRK-1107,79,(555) 201-3438
+DRV-1108,Bruno Almeida 2,KCK,KCK,"Kansas City, KS",Off Duty,0.7,2.9,8.7,22.6,2026-10-14T06:12Z,Reefer-certified,Flatbed 48ft,TRK-1108,79,(555) 614-4778
+DRV-1109,Tessa Nguyen 2,COL,COL,"Columbus, OH",Off Duty,0.4,3.0,2.2,29.4,2026-10-13T19:48Z,None,Reefer 53ft,TRK-1109,88,(555) 846-2258
+DRV-1110,Reuben Osei 2,ATL,ATL,"Atlanta, GA",On Break,3.1,6.4,9.1,24.4,2026-10-14T01:18Z,Hazmat,Reefer 53ft,TRK-1110,90,(555) 562-1874
+DRV-1111,Lidia Kowalczyk 2,ABQ,ABQ,"Albuquerque, NM",On Load,2.3,4.0,8.0,51.0,2026-10-14T02:06Z,None,Reefer 53ft,TRK-1111,98,(555) 345-8796
+DRV-1112,Soren Bjorklund 2,DET,DET,"Detroit, MI",On Load,2.7,4.4,1.8,34.1,2026-10-13T22:00Z,None,Dry Van 53ft,TRK-1112,93,(555) 619-3603
+DRV-1113,Hana Takahashi 2,COL,COL,"Columbus, OH",On Load,8.7,10.2,8.4,21.6,2026-10-14T06:12Z,Reefer-certified,Flatbed 48ft,TRK-1113,94,(555) 217-2078
+DRV-1114,Malcolm Reyes 2,ELP,ELP,"El Paso, TX",Off Duty,3.8,5.1,6.8,32.6,2026-10-14T08:06Z,"Reefer-certified,Tanker",Dry Van 53ft,TRK-1114,86,(555) 875-2816
+DRV-1115,Petra Silva 2,MEM,MEM,"Memphis, TN",Off Duty,2.1,4.4,3.0,65.8,2026-10-14T02:18Z,Reefer-certified,Flatbed 48ft,TRK-1115,86,(555) 780-2841
+DRV-1116,Emeka Adeyemi 2,KCK,KCK,"Kansas City, KS",Off Duty,1.8,4.9,8.9,52.9,2026-10-14T00:30Z,"Reefer-certified,Tanker",Flatbed 48ft,TRK-1116,80,(555) 746-2144
+DRV-1117,Clara Fontaine 2,CHI,CHI,"Chicago, IL",On Load,4.7,5.5,9.4,17.5,2026-10-14T05:24Z,Hazmat,Reefer 53ft,TRK-1117,88,(555) 531-6675
+DRV-1118,Rustam Karimov 2,LAX,LAX,"Los Angeles, CA",On Load,4.9,6.3,4.9,60.3,2026-10-13T18:42Z,None,Dry Van 53ft,TRK-1118,86,(555) 939-7816
+DRV-1119,Bianca Rossi 2,MEM,MEM,"Memphis, TN",Off Duty,6.8,10.6,0.2,29.2,2026-10-14T03:06Z,None,Flatbed 48ft,TRK-1119,93,(555) 714-9628
+DRV-1120,Neil Fairbanks 2,KCK,KCK,"Kansas City, KS",On Break,6.1,9.9,7.7,34.6,2026-10-13T21:06Z,"Hazmat,TWIC",Dry Van 53ft,TRK-1120,77,(555) 585-5137

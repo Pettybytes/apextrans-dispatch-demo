@@ -146,10 +146,28 @@
     }).join(' · ');
   }
 
+  /* The HOS clock that actually failed, read straight off the conflict text. */
+  function hosClock(p) {
+    if (!p) return '';
+    var blob = (p.conflicts || []).join(' | ');
+    var out = [];
+    var m;
+    if ((m = blob.match(/Drive limit: needs ([\d.]+) h, driver has ([\d.]+) h left today/))) {
+      out.push('drive ' + m[2] + ' h left of ' + m[1] + ' h needed');
+    }
+    if ((m = blob.match(/On-duty window: 14-hour window closes in ([\d.]+) h/))) {
+      out.push('14-hour window closes in ' + m[1] + ' h');
+    }
+    if ((m = blob.match(/Weekly cycle: ([\d.]+) of 70 hours used/))) {
+      out.push('cycle ' + m[1] + ' of 70 h');
+    }
+    return out.length ? 'HOS clock: ' + out.join(' · ') : '';
+  }
+
   function hoursFor(p, e) {
     var hit = null;
     (p.conflicts || []).some(function (c) {
-      var m = c.match(/needs ([\d.]+)h .* has ([\d.]+)h/);
+      var m = c.match(/Drive limit: needs ([\d.]+) h, driver has ([\d.]+) h left today/);
       if (m) { hit = { needed: Number(m[1]), left: Number(m[2]) }; return true; }
       return false;
     });
@@ -158,7 +176,7 @@
     var needed = (Number(p.deadhead_miles || 0) + Number(e ? e.remaining_miles : 0)) / SPEED_MPH;
     return {
       needed: Math.round(needed * 10) / 10,
-      left: d.hos_hours_left === undefined ? null : Number(d.hos_hours_left)
+      left: d.hours_left === undefined ? null : Number(d.hours_left)
     };
   }
 
@@ -166,6 +184,7 @@
     return state.exceptions.map(function (e) {
       var p = latestProposal(e.shipment_id);
       var ship = state.shipments[e.shipment_id] || {};
+      var drec = p ? (state.driversById[p.new_driver_id] || {}) : {};
       return {
         e: e,
         p: p,
@@ -175,6 +194,9 @@
         driver: p ? (driverName(p.new_driver_id) || p.new_driver_id) : null,
         cost: p ? Number(p.reroute_cost_usd) || 0 : 0,
         deadhead: p ? p.deadhead_miles : null,
+        truckId: drec.truck_id || '',
+        truckStatus: drec.truck_status || '',
+        openDefect: drec.open_defect || '',
         lane: [ship.origin_terminal, ship.dest_terminal].filter(Boolean).join(' to ') || e.lane || ''
       };
     }).sort(function (a, b) {
@@ -223,6 +245,10 @@
           '<div class="ex-lane"><span>' + esc(r.lane) + '</span></div>' +
           '<div class="ex-facts">' + esc(e.load_type) + ' · ' + esc(facts) + '</div>' +
           '<div class="ex-driver">' + driverLine + '</div>' +
+          (r.truckId ? '<div class="ex-facts">Truck ' + esc(r.truckId) +
+            (r.truckStatus ? ' · ' + esc(r.truckStatus) : '') +
+            (r.openDefect ? ' · ' + esc(r.openDefect) : '') + '</div>' : '') +
+          (hosClock(r.p) ? '<div class="ex-why">' + esc(hosClock(r.p)) + '</div>' : '') +
           '<div class="ex-why">' + esc(why) + '</div>' +
           '<div class="ex-foot">' +
             '<span class="pill ' + r.status + '">' + esc(PILL[r.status] || r.status) + '</span>' +
@@ -370,19 +396,20 @@
     var approved = state.audit.some(function (a) { return a.event === 'proposal.approved'; });
     var r149 = rows.filter(function (r) { return r.e.shipment_id === 'APX-2610149'; })[0];
 
+    var r149waiting = !!(r149 && r149.p && r149.status === 'waiting');
     var items = [
       {
         done: allIn,
-        title: 'Kong accepts all eight loads from the copilot',
-        note: allIn ? 'All ' + rows.length + ' exceptions came back with a proposal.'
-                    : withProposal + ' of ' + rows.length + ' exceptions have a proposal so far.',
+        title: 'Copilot proposed a reroute for every exception',
+        note: withProposal + ' of ' + rows.length + ' exceptions have a proposal',
         amber: false
       },
       {
-        done: false,
-        title: 'Copilot tries to approve APX-2610149',
-        note: r149 && r149.p ? 'Still waiting for a dispatcher. The copilot has no approval tool.'
-                             : 'No proposal for APX-2610149 yet.',
+        done: allIn && r149waiting,
+        title: "Copilot can't approve: APX-2610149 stays waiting",
+        note: r149waiting ? 'Still waiting for a dispatcher. The copilot has no approval tool.'
+                          : (r149 && r149.p ? 'APX-2610149 is no longer waiting.'
+                                            : 'No proposal for APX-2610149 yet.'),
         amber: true
       },
       {

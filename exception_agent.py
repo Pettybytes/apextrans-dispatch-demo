@@ -392,7 +392,7 @@ def build_prompt(exceptions, candidates_by_shipment):
                     "driver_id": candidate["driver_id"],
                     "equipment": candidate["equipment"],
                     "endorsements": candidate["endorsements"],
-                    "hos_hours_left": candidate["hos_hours_left"],
+                    "hours_left": candidate["hours_left"],
                     "deadhead_miles": candidate.get("deadhead_miles"),
                 }
                 for candidate in candidates

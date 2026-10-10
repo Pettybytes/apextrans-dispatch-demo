@@ -105,6 +105,7 @@ class Dispatch:
         self.shipments = {}
         self.drivers = {}
         self.terminals = {}
+        self.trucks = {}
         self.proposals = {}
         self.proposal_order = []
         self.proposal_seq = 0
@@ -130,6 +131,14 @@ class Dispatch:
             for row in self._read_csv("drivers.csv")
             if row.get(DRIVER_KEY)
         }
+        try:
+            self.trucks = {
+                row["truck_id"]: row
+                for row in self._read_csv("trucks.csv")
+                if row.get("truck_id")
+            }
+        except OSError:
+            self.trucks = {}
 
     def _read_csv(self, name):
         path = os.path.join(self.data_dir, name)
@@ -190,8 +199,34 @@ class Dispatch:
     def transit_hours(self, shipment, deadhead_miles):
         return round((deadhead_miles + self.remaining_miles(shipment)) / SPEED_MPH, 2)
 
-    def new_eta(self, shipment, deadhead_miles):
-        """Projected arrival for the new driver.
+    # ---- hours of service ------------------------------------------------
+    def driver_hours(self, driver):
+        """(drive_left, window_left, cycle_left) from the driver's HOS record."""
+        return (
+            max(0.0, 11.0 - _f(driver.get("drive_hours_used_today"))),
+            max(0.0, 14.0 - _f(driver.get("on_duty_window_used"))),
+            max(0.0, 70.0 - _f(driver.get("cycle_hours_used_8d"))),
+        )
+
+    def available_hours(self, driver):
+        """Legal driving hours available right now: the binding limit of the three."""
+        return min(self.driver_hours(driver))
+
+    # ---- equipment -------------------------------------------------------
+    def truck_for(self, driver):
+        """The tractor assigned to a driver (empty record when unknown)."""
+        return self.trucks.get((driver.get("truck_id") or "").strip()) or {}
+
+    def truck_fields(self, driver):
+        truck = self.truck_for(driver)
+        return {
+            "truck_id": truck.get("truck_id", ""),
+            "truck_status": truck.get("status", ""),
+            "open_defect": truck.get("open_defect", ""),
+        }
+
+    def new_eta(self, shipment, deadhead_miles, extra_hours=0.0):
+        """Projected arrival, plus any break or overnight-reset time.
 
         Anchored at max(now, pickup) so a run before the pickup window still
         produces a sensible in-window estimate.
@@ -200,16 +235,22 @@ class Dispatch:
         pickup = parse_utc(shipment.get("pickup_utc"))
         if pickup and pickup > reference:
             reference = pickup
-        hours = (deadhead_miles + self.remaining_miles(shipment)) / SPEED_MPH
+        hours = (deadhead_miles + self.remaining_miles(shipment)) / SPEED_MPH + extra_hours
         return reference + timedelta(hours=hours)
 
     # ---- rule engine ------------------------------------------------------
     def evaluate_reroute(self, shipment, driver):
-        """Return (conflicts, deadhead_miles, cost_usd, new_eta_datetime)."""
+        """Return (conflicts, notes, deadhead_miles, cost_usd, new_eta_datetime).
+
+        ``conflicts`` are hard: any one of them holds the reroute for a human.
+        ``notes`` only move the ETA (a break, or an overnight reset), so they do
+        not hold a reroute on their own - they just make a late arrival likelier.
+        """
         conflicts = []
+        notes = []
         deadhead = self.deadhead_miles(driver, shipment)
         cost = self.reroute_cost_usd(shipment, deadhead)
-        eta = self.new_eta(shipment, deadhead)
+        needed = (deadhead + self.remaining_miles(shipment)) / SPEED_MPH
 
         load_type = (shipment.get("load_type") or "").strip()
         required_equipment = EQUIPMENT_FOR_LOAD.get(load_type)
@@ -238,13 +279,54 @@ class Dispatch:
                 % (driver[DRIVER_KEY], self._pending_proposal_for(driver[DRIVER_KEY]))
             )
 
-        needed_hours = (deadhead + self.remaining_miles(shipment)) / SPEED_MPH
-        hos = _f(driver.get("hos_hours_left"))
-        if hos < needed_hours:
+        # --- hours of service: three independent limits -----------------------
+        drive_left, window_left, cycle_left = self.driver_hours(driver)
+        if drive_left < needed:
             conflicts.append(
-                "HOS shortfall: reroute needs %.1fh (deadhead %d mi + %s mi remaining), %s has %.1fh"
-                % (needed_hours, deadhead, self.remaining_miles(shipment), driver[DRIVER_KEY], hos)
+                "Drive limit: needs %.1f h, driver has %.1f h left today (11-hour rule)"
+                % (needed, drive_left)
             )
+        if window_left < needed:
+            conflicts.append(
+                "On-duty window: 14-hour window closes in %.1f h" % window_left
+            )
+        if cycle_left < needed:
+            conflicts.append(
+                "Weekly cycle: %.0f of 70 hours used" % _f(driver.get("cycle_hours_used_8d"))
+            )
+
+        # soft: these only push the ETA out
+        extra_hours = 0.0
+        since_break = _f(driver.get("hours_since_last_break"))
+        if since_break >= 8.0:
+            notes.append(
+                "Break due: 30-minute break needed before driving (%.0f h since last break)"
+                % since_break
+            )
+            extra_hours += 0.5
+        if needed > self.available_hours(driver):
+            notes.append("needs an overnight reset")
+            extra_hours += 10.0
+
+        # --- tractor condition -------------------------------------------------
+        truck = self.truck_for(driver)
+        if truck:
+            defect = (truck.get("open_defect") or "").strip()
+            if (truck.get("status") or "").strip() == "Out of service":
+                conflicts.append("Truck out of service: %s" % (defect or "no defect recorded"))
+            if defect:
+                if load_type == "Reefer" and "reefer" in defect.lower():
+                    conflicts.append(
+                        "Reefer unit fault on truck %s: %s. Trailer cannot hold temperature for this load"
+                        % (truck.get("truck_id"), defect)
+                    )
+                else:
+                    conflicts.append(
+                        "Open defect on truck %s: %s. Must be repaired before dispatch"
+                        % (truck.get("truck_id"), defect)
+                    )
+
+        eta = self.new_eta(shipment, deadhead, extra_hours)
 
         due = parse_utc(shipment.get("delivery_due_utc"))
         if due and eta > due:
@@ -261,7 +343,7 @@ class Dispatch:
                 "cost $%.0f over $%.0f limit" % (cost, AUTO_APPROVE_LIMIT_USD)
             )
 
-        return conflicts, deadhead, cost, eta
+        return conflicts, notes, deadhead, cost, eta
 
     def _pending_proposal_for(self, driver_id):
         for proposal_id in reversed(self.proposal_order):
@@ -275,7 +357,7 @@ class Dispatch:
         with self.lock:
             shipment = self.shipment(shipment_id)
             driver = self.driver(new_driver_id)
-            conflicts, deadhead, cost, eta = self.evaluate_reroute(shipment, driver)
+            conflicts, notes, deadhead, cost, eta = self.evaluate_reroute(shipment, driver)
 
             self.proposal_seq += 1
             proposal_id = "RR-%04d" % self.proposal_seq
@@ -288,6 +370,7 @@ class Dispatch:
                 "reroute_cost_usd": cost,
                 "new_eta_utc": iso_z(eta),
                 "conflicts": conflicts,
+                "notes": notes,
                 "decision": decision,
                 "status": "pending" if decision == "pending_human" else "applied",
                 "reason": reason,
@@ -432,12 +515,20 @@ class Dispatch:
                 "home_terminal": driver.get("home_terminal"),
                 "current_terminal": driver.get("current_terminal"),
                 "current_city": driver.get("current_city"),
-                "hos_hours_left": _f(driver.get("hos_hours_left")),
+                "hours_left": round(self.available_hours(driver), 1),
+                "drive_hours_left": round(self.driver_hours(driver)[0], 1),
+                "window_hours_left": round(self.driver_hours(driver)[1], 1),
+                "cycle_hours_left": round(self.driver_hours(driver)[2], 1),
+                "drive_hours_used_today": _f(driver.get("drive_hours_used_today")),
+                "on_duty_window_used": _f(driver.get("on_duty_window_used")),
+                "hours_since_last_break": _f(driver.get("hours_since_last_break")),
+                "cycle_hours_used_8d": _f(driver.get("cycle_hours_used_8d")),
                 "endorsements": driver.get("endorsements"),
                 "equipment": driver.get("equipment"),
                 "safety_score": driver.get("safety_score"),
                 "holds_pending_proposal": driver[DRIVER_KEY] in self.held_drivers,
             }
+            record.update(self.truck_fields(driver))
             if shipment is not None:
                 deadhead = self.deadhead_miles(driver, shipment)
                 record["deadhead_miles"] = deadhead
@@ -462,6 +553,7 @@ class Dispatch:
         record = dict(shipment)
         record["remaining_miles"] = self.remaining_miles(shipment)
         record["nearest_terminal"] = self.nearest_terminal_code(shipment)
+        record.update(self.truck_fields(self.drivers.get(shipment.get("driver_id"), {})))
         return record
 
     def pending_proposals(self, status=None):

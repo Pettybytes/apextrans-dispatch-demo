@@ -27,6 +27,14 @@ AUTO_DRIVER = os.environ.get("AUTO_DRIVER", "DRV-1009")               # Reefer-c
 # Dry Van driver) so it never depends on the tunable speed/HOS or cost constant.
 HELD_SHIPMENT = os.environ.get("HELD_SHIPMENT", "APX-2610145")        # Flatbed, nearest terminal KCK
 HELD_DRIVER = os.environ.get("HELD_DRIVER", "DRV-1001")               # Dry Van 53ft -> equipment mismatch
+# Rule fixtures for the HOS clocks and the new tractor checks. They use the four
+# new exceptions so the canonical story-beat shipments stay untouched.
+TRUCK_OOS_SHIPMENT = os.environ.get("TRUCK_OOS_SHIPMENT", "APX-2610207")
+TRUCK_OOS_DRIVER = os.environ.get("TRUCK_OOS_DRIVER", "DRV-1004")     # tractor out of service
+DEFECT_SHIPMENT = os.environ.get("DEFECT_SHIPMENT", "APX-2610203")
+DEFECT_DRIVER = os.environ.get("DEFECT_DRIVER", "DRV-1006")           # open defect on the tractor
+HOS_SHIPMENT = os.environ.get("HOS_SHIPMENT", "APX-2610211")
+HOS_DRIVER = os.environ.get("HOS_DRIVER", "DRV-1007")                 # short on today's drive clock
 
 results = []
 
@@ -60,7 +68,7 @@ def main():
     check("health returns ok", health.get("ok") is True, json.dumps(health))
 
     _, exceptions = call("GET", "/exceptions", expect=200)
-    check("8 open exceptions", exceptions.get("count") == 8, "count=%s" % exceptions.get("count"))
+    check("12 open exceptions", exceptions.get("count") == 12, "count=%s" % exceptions.get("count"))
     hazmat = [e for e in exceptions["exceptions"] if e["shipment_id"] == "APX-2610141"]
     check(
         "hazmat exception present",
@@ -173,6 +181,37 @@ def main():
         expect=409,
     )
     check("re-approving an applied proposal is rejected", True, approval_reject.get("error", ""))
+
+    # --- new data surfaces: HOS clocks and tractor condition ----------------
+    _, drv = call("GET", "/drivers/available", expect=200)
+    sample = drv["drivers"][0] if drv.get("drivers") else {}
+    check(
+        "drivers expose the HOS clocks and the assigned tractor",
+        {"hours_left", "drive_hours_left", "window_hours_left", "cycle_hours_left",
+         "truck_id", "truck_status", "open_defect"}.issubset(set(sample)),
+        "keys=%s" % sorted(k for k in sample if "hours" in k or "truck" in k or "defect" in k),
+    )
+    _, one = call("GET", "/shipments/%s" % AUTO_SHIPMENT, expect=200)
+    check(
+        "shipments expose the assigned tractor",
+        {"truck_id", "truck_status", "open_defect"}.issubset(set(one)),
+        "truck=%s status=%s" % (one.get("truck_id"), one.get("truck_status")),
+    )
+
+    for label, shipment, driver, marker in (
+        ("truck out of service holds the reroute", TRUCK_OOS_SHIPMENT, TRUCK_OOS_DRIVER, "Truck out of service"),
+        ("open tractor defect holds the reroute", DEFECT_SHIPMENT, DEFECT_DRIVER, "Open defect on truck"),
+        ("drive clock holds the reroute", HOS_SHIPMENT, HOS_DRIVER, "Drive limit:"),
+    ):
+        _, prop = call(
+            "POST",
+            "/reroutes",
+            {"shipment_id": shipment, "new_driver_id": driver,
+             "reason": "acceptance: %s" % label, "requested_by": "check_acceptance"},
+            expect=201,
+        )
+        joined = " ".join(prop.get("conflicts", []))
+        check(label, prop["decision"] == "pending_human" and marker in joined, joined[:160] or "(no conflicts)")
 
     _, missing = call("GET", "/shipments/APX-DOES-NOT-EXIST", expect=404)
     check("unknown shipment returns 404", "error" in missing, missing.get("error", ""))

@@ -21,15 +21,48 @@ A cost above the limit is reported as a conflict
 | 1 | **Equipment mismatch** | `Reefer` load needs `Reefer 53ft`; `Flatbed` needs `Flatbed 48ft`; `Dry Van` and `Hazmat` need `Dry Van 53ft` |
 | 2 | **Hazmat endorsement** | A `Hazmat` load may only go to a driver holding the `Hazmat` endorsement |
 | 3 | **Reefer certification** | A `Reefer` load may only go to a `Reefer-certified` driver |
-| 4 | **Hours of service** | `hos_hours_left` must cover the whole job: `(deadhead_miles + remaining_miles) / 55 mph` |
-| 5 | **Availability** | Driver must be `Available`, and must not already be holding another pending proposal |
+| 4 | **Drive limit (11-hour)** | `11 − drive_hours_used_today` must cover the job |
+| 5 | **On-duty window (14-hour)** | `14 − on_duty_window_used` must cover the job |
+| 6 | **Weekly cycle (70-hour)** | `70 − cycle_hours_used_8d` must cover the job |
+| 7 | **Truck out of service** | `Truck out of service: <defect>` |
+| 8 | **Open tractor defect** | `Open defect on truck <id>: <defect>. Must be repaired before dispatch` |
+| 9 | **Reefer unit fault** | A `Reefer` load cannot move on a tractor whose open defect is the reefer unit |
+| 10 | **Availability** | Driver must be `Available`, and must not already be holding another pending proposal |
+| 11 | **Estimated cost** | Over the auto-approval limit (`cost $746 over $500 limit`) |
+| 12 | **Missed delivery window** | The projected ETA is still after `delivery_due_utc` |
+| 13 | **Critical priority** | Any `priority=Critical` shipment requires human approval |
 
-## Soft conflicts — hold for a human
+## Hours of service
 
-| # | Rule | Notes |
-| --- | --- | --- |
-| 6 | **Missed delivery window** | If the projected new ETA is still after `delivery_due_utc` |
-| 7 | **Critical priority** | Any `priority=Critical` shipment requires human approval regardless of cost |
+Each driver carries live clocks rather than one number:
+
+- `drive_hours_used_today`, `on_duty_window_used`, `hours_since_last_break`, `cycle_hours_used_8d`, `last_10h_reset_utc`
+- `available = min(11 − drive_hours_used_today, 14 − on_duty_window_used, 70 − cycle_hours_used_8d)`
+
+The job needs `(deadhead_miles + remaining_miles) / 55 mph`. Every clock that
+cannot cover it reports its own line:
+
+- `Drive limit: needs 9.4 h, driver has 3.1 h left today (11-hour rule)`
+- `On-duty window: 14-hour window closes in 2.0 h`
+- `Weekly cycle: 66 of 70 hours used`
+
+## Tractor condition
+
+`trucks.csv` holds one tractor per driver (`truck_id, terminal, equipment,
+status, open_defect, last_inspection_utc`). `GET /drivers/available` and
+`GET /shipments/{id}` carry `truck_id`, `truck_status` and `open_defect`. An out
+of service tractor, an open defect, or a reefer unit fault on a `Reefer` load is
+a hard conflict, so a load never moves on a tractor that should not be rolling.
+
+## ETA notes — never a hold on their own
+
+These only push the ETA out; they are reported in the proposal's `notes` list,
+kept separate from `conflicts` so an auto-applied reroute still has no conflicts:
+
+| Rule | Effect |
+| --- | --- |
+| **Break due** (`hours_since_last_break >= 8`) | adds 30 minutes |
+| **Overnight reset** (job longer than the remaining shift) | adds a 10-hour reset |
 
 ## Cost model
 

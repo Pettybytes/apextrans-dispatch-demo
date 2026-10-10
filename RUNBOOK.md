@@ -30,20 +30,25 @@ approval is skipped.
 
 1. **Service is up**
    `docker restart apex-dispatch && curl -s localhost:8090/health`
-   → `{"ok": true}`
+   → `{"ok": true}`. Fresh state is **12 open exceptions, 0 pending**.
 
 2. **Acceptance suite** (always reset first, it writes state)
    `python3 check_acceptance.py`
-   → 16 lines, ending `15/15 checks passed` and `ACCEPTANCE OK`
+   → ending `20/20 checks passed` and `ACCEPTANCE OK`
 
 3. **Writes are gateway-only now** (this is the point, not a bug)
    `python3 exception_agent.py --direct --yes --reset`
    → `--reset` restarts the container first (`docker restart apex-dispatch`).
-   Reads work, so the tool list and the eight exceptions print, but the first
+   Reads work, so the tool list and the twelve exceptions print, but the first
    reroute is refused: `403 writes are only accepted through Kong AI Gateway`.
    `--direct` reaches the service and gets nowhere, so use the gateway path
    (step 4) for the full flow. Every refusal is written to `/audit` as
    "blocked direct write from <ip>".
+
+   A normal run on fresh data gives **3 auto-applied and 9 held**: APX-2610161,
+   APX-2610177 and APX-2610140 clear the rules on their own, and the rest wait
+   for a dispatcher - mostly on the drive clock, a tractor defect, or the
+   estimated cost.
 
 4. **Through the gateway** (once the Kong tools are applied)
    `source ~/.kong/apextrans-squad-keys.env` (you run this, never Bentley)

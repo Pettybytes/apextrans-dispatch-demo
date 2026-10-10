@@ -1,0 +1,45 @@
+driver_id,name,home_terminal,current_terminal,current_city,status,hos_hours_left,endorsements,equipment,safety_score,phone
+DRV-1001,Malik Holloway,CHI,CHI,"Chicago, IL",Available,9.3,None,Dry Van 53ft,91,(555) 460-1571
+DRV-1002,Dana Reyes,MEM,MEM,"Memphis, TN",Available,9.0,Reefer-certified,Reefer 53ft,89,(555) 677-9403
+DRV-1003,Luis Brandt,DAL,DAL,"Dallas, TX",Available,9.2,None,Flatbed 48ft,97,(555) 801-8693
+DRV-1004,Keisha Okafor,DEN,DEN,"Denver, CO",Available,7.9,Hazmat,Dry Van 53ft,90,(555) 777-3425
+DRV-1005,Tom Sullivan,ATL,ATL,"Atlanta, GA",Available,8.4,Reefer-certified,Reefer 53ft,88,(555) 578-6424
+DRV-1006,Priya Natarajan,KCK,KCK,"Kansas City, KS",Available,9.3,Hazmat,Dry Van 53ft,91,(555) 390-5014
+DRV-1007,Andre Fields,STL,STL,"St. Louis, MO",Available,7.7,None,Flatbed 48ft,92,(555) 673-9012
+DRV-1008,Rosa Castillo,NSH,NSH,"Nashville, TN",Available,8.7,None,Dry Van 53ft,97,(555) 289-1557
+DRV-1009,Jamal Wright,PHX,PHX,"Phoenix, AZ",Available,8.7,Reefer-certified,Reefer 53ft,89,(555) 799-4726
+DRV-1010,Erin Lindqvist,HAR,HAR,"Harrisburg, PA",Available,9.1,Hazmat,Dry Van 53ft,87,(555) 410-9755
+DRV-1011,Victor Morales,MSP,NSH,"Nashville, TN",Off Duty,0.0,None,Dry Van 53ft,99,(555) 601-3010
+DRV-1012,Mei Chen,KCK,HAR,"Harrisburg, PA",On Load,6.7,None,Dry Van 53ft,90,(555) 843-1357
+DRV-1013,Darnell Baptiste,COL,IND,"Indianapolis, IN",On Load,5.2,None,Reefer 53ft,95,(555) 260-3145
+DRV-1014,Sofia Ivanova,DET,IND,"Indianapolis, IN",On Load,6.4,None,Reefer 53ft,94,(555) 769-1263
+DRV-1015,Hank Pruitt,CHI,MEM,"Memphis, TN",On Load,7.2,Reefer-certified,Flatbed 48ft,89,(555) 776-7879
+DRV-1016,Tasha Greene,DET,MEM,"Memphis, TN",On Load,3.9,Reefer-certified,Flatbed 48ft,87,(555) 242-5811
+DRV-1017,Omar Haddad,STL,CLE,"Cleveland, OH",On Load,9.8,None,Flatbed 48ft,88,(555) 261-3139
+DRV-1018,Lena Kowalski,OAK,MSP,"Minneapolis, MN",On Load,4.0,Reefer-certified,Dry Van 53ft,87,(555) 394-8868
+DRV-1019,Curtis Dunbar,ABQ,SLC,"Salt Lake City, UT",On Load,5.1,Hazmat,Flatbed 48ft,90,(555) 641-4971
+DRV-1020,Ana Ferreira,HOU,DEN,"Denver, CO",Off Duty,0.0,Reefer-certified,Dry Van 53ft,84,(555) 589-7528
+DRV-1021,Rick Tate,STL,CHI,"Chicago, IL",Off Duty,0.0,None,Reefer 53ft,91,(555) 510-9774
+DRV-1022,Nia Mensah,PHX,SEA,"Seattle, WA",On Load,2.1,Hazmat,Reefer 53ft,91,(555) 205-7393
+DRV-1023,Grant Albright,MSP,KCK,"Kansas City, KS",On Load,9.0,None,Dry Van 53ft,99,(555) 226-5229
+DRV-1024,Yolanda Vance,COL,SLC,"Salt Lake City, UT",On Load,8.0,Hazmat,Flatbed 48ft,86,(555) 623-4320
+DRV-1025,Ben Ortiz,CHI,LAX,"Los Angeles, CA",On Load,4.3,Hazmat,Dry Van 53ft,93,(555) 718-2796
+DRV-1026,Carla Kim,COL,NSH,"Nashville, TN",On Break,0.0,Hazmat,Flatbed 48ft,87,(555) 544-4847
+DRV-1027,Eddie Doyle,STL,PHX,"Phoenix, AZ",On Load,5.3,Reefer-certified,Flatbed 48ft,91,(555) 364-5537
+DRV-1028,Fatima Rahman,MSP,NSH,"Nashville, TN",On Load,4.2,None,Reefer 53ft,85,(555) 643-8947
+DRV-1029,Glen Becker,DAL,IND,"Indianapolis, IN",On Load,6.9,None,Reefer 53ft,87,(555) 631-6836
+DRV-1030,Ivy Nguyen,CLE,SEA,"Seattle, WA",On Load,5.0,None,Dry Van 53ft,97,(555) 850-8241
+DRV-1031,Wes Hart,IND,STL,"St. Louis, MO",On Load,10.0,Hazmat,Flatbed 48ft,87,(555) 339-5911
+DRV-1032,Jo Silva,LAX,DAL,"Dallas, TX",On Load,6.4,None,Reefer 53ft,98,(555) 327-6751
+DRV-1033,Kofi Asante,SEA,DET,"Detroit, MI",On Load,2.1,None,Flatbed 48ft,86,(555) 689-2892
+DRV-1034,Lars Berg,CLE,HAR,"Harrisburg, PA",On Break,0.0,Reefer-certified,Dry Van 53ft,89,(555) 864-7510
+DRV-1035,Maya Patel,JAX,IND,"Indianapolis, IN",On Load,6.3,None,Reefer 53ft,95,(555) 400-1007
+DRV-1036,Nate Russo,DAL,OAK,"Oakland, CA",On Load,4.3,None,Dry Van 53ft,94,(555) 676-5016
+DRV-1037,Opal Quist,DEN,CLT,"Charlotte, NC",On Load,6.5,Hazmat,Flatbed 48ft,89,(555) 371-8611
+DRV-1038,Pete Novak,PHX,HOU,"Houston, TX",Off Duty,0.0,Reefer-certified,Flatbed 48ft,89,(555) 343-7139
+DRV-1039,Quinn Shaw,NWK,CLT,"Charlotte, NC",On Load,3.2,None,Flatbed 48ft,87,(555) 887-3645
+DRV-1040,Ray Bishop,PHX,KCK,"Kansas City, KS",On Load,7.9,Hazmat,Dry Van 53ft,89,(555) 468-1356
+DRV-1041,Sam Park,DAL,KCK,"Kansas City, KS",On Load,2.2,Hazmat,Flatbed 48ft,90,(555) 755-1831
+DRV-1042,Tia Diallo,DEN,NSH,"Nashville, TN",On Load,7.5,Reefer-certified,Flatbed 48ft,90,(555) 848-3667
+DRV-1043,Uma Iyer,HOU,ABQ,"Albuquerque, NM",On Load,2.9,Hazmat,Reefer 53ft,93,(555) 586-4830
+DRV-1044,Zeke Frost,HOU,ABQ,"Albuquerque, NM",On Load,3.0,None,Reefer 53ft,85,(555) 250-3007
