@@ -40,6 +40,10 @@ import urllib.request
 DEFAULT_DIRECT_BASE = os.environ.get("DISPATCH_BASE_URL", "http://localhost:8090")
 LLM_MODEL = os.environ.get("APEX_LLM_MODEL", "my-gpt-4o")
 REQUEST_TIMEOUT = int(os.environ.get("APEX_HTTP_TIMEOUT", "30"))
+SYSTEM_PROMPT = "You are a precise freight dispatcher. Reply with compact JSON only."
+# The gateway rate-limits one request against the squad's tokens/minute budget,
+# so the prompt stays small: this many closest candidates, minimal fields.
+CANDIDATES_PER_EXCEPTION = int(os.environ.get("APEX_PROMPT_CANDIDATES", "3"))
 
 # ---------------------------------------------------------------- pretty print
 _USE_COLOR = sys.stdout.isatty()
@@ -342,36 +346,56 @@ class Tools:
 
 # ------------------------------------------------------------------- LLM picker
 def build_prompt(exceptions, candidates_by_shipment):
-    lines = [
-        "You are a dispatcher assistant for ApexTrans.",
-        "For each exception choose the single best available driver.",
-        "Prefer drivers that match the equipment and endorsement, have enough HOS for",
-        "deadhead_miles + remaining_miles at 55 mph, are closest (lowest cost), and can still",
-        "meet delivery_due_utc. If no driver is a clean fit, still pick the least-bad option.",
-        "Reply with JSON only, shape:",
-        '{"picks":[{"shipment_id":"APX-...","new_driver_id":"DRV-....","reason":"one sentence"}]}',
-        "",
-        json.dumps(
-            [
+    """Compact prompt: the closest few candidates per exception, minimal fields.
+
+    Deliberately small so one request fits inside the squad's tokens/minute
+    budget - only the top candidates by deadhead miles and the fields the model
+    actually needs to choose.
+    """
+    payload = []
+    for exception in exceptions:
+        candidates = sorted(
+            candidates_by_shipment.get(exception["shipment_id"], []),
+            key=lambda candidate: candidate.get("deadhead_miles", 1e9),
+        )[:CANDIDATES_PER_EXCEPTION]
+        payload.append({
+            "shipment_id": exception["shipment_id"],
+            "load_type": exception["load_type"],
+            "priority": exception["priority"],
+            "exception_type": exception["exception_type"],
+            "late_hours": exception.get("late_vs_due_hours"),
+            "candidates": [
                 {
-                    "exception": {
-                        "shipment_id": exception["shipment_id"],
-                        "load_type": exception["load_type"],
-                        "priority": exception["priority"],
-                        "nearest_terminal": exception["nearest_terminal"],
-                        "remaining_miles": exception["remaining_miles"],
-                        "delivery_due_utc": exception["delivery_due_utc"],
-                        "eta_utc": exception["eta_utc"],
-                        "exception_type": exception["exception_type"],
-                    },
-                    "candidates": candidates_by_shipment[exception["shipment_id"]],
+                    "driver_id": candidate["driver_id"],
+                    "equipment": candidate["equipment"],
+                    "endorsements": candidate["endorsements"],
+                    "hos_hours_left": candidate["hos_hours_left"],
+                    "deadhead_miles": candidate.get("deadhead_miles"),
                 }
-                for exception in exceptions
+                for candidate in candidates
             ],
-            indent=1,
-        ),
-    ]
-    return "\n".join(lines)
+        })
+    return "\n".join([
+        "Dispatcher assistant. For each exception pick the single best driver from its candidates.",
+        "Match equipment and endorsement, prefer enough HOS and the lowest deadhead miles.",
+        "late_hours = ETA minus delivery due in hours (positive = late).",
+        "Reply with compact JSON only:",
+        '{"picks":[{"shipment_id":"APX-..","new_driver_id":"DRV-..","reason":"under 10 words"}]}',
+        json.dumps(payload, separators=(",", ":")),
+    ])
+
+
+def count_prompt_tokens(prompt):
+    """Local token count for the request so a rehearsal can show its size.
+
+    Uses tiktoken (o200k_base, what gpt-4o bills against) when available.
+    """
+    blob = SYSTEM_PROMPT + "\n" + prompt
+    try:
+        import tiktoken
+        return len(tiktoken.get_encoding("o200k_base").encode(blob)) + 8, "tiktoken o200k_base +8 framing"
+    except Exception:
+        return round(len(blob) / 4) + 8, "chars/4 estimate +8 framing"
 
 
 def extract_json(text):
@@ -394,7 +418,7 @@ def call_llm(proxy_url, api_key, prompt, model=LLM_MODEL):
         "temperature": 0,
         "max_tokens": 400,
         "messages": [
-            {"role": "system", "content": "You are a precise freight dispatcher. Reply with JSON only."},
+            {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": prompt},
         ],
     }
@@ -528,12 +552,17 @@ def main():
         try:
             decision, usage = call_llm(proxy_url, key_dispatch, prompt, args.model)
             picks = decision.get("picks", []) or []
-            note("model replied (tokens: %s)" % usage.get("total_tokens", "?"))
+            note("prompt tokens: %s of the 5000/min budget (total: %s)"
+                 % (usage.get("prompt_tokens", "?"), usage.get("total_tokens", "?")))
         except HttpError as exc:
             print("%sLLM call failed via gateway (%s) - using the local allocator%s" % (AMBER, exc.status, RESET))
+            tokens, method = count_prompt_tokens(prompt)
+            note("the request we were sending is %d tokens (%s); budget 5000/min" % (tokens, method))
             picks = []
     else:
         print("%sKONNECT_PROXY_URL / KEY_DISPATCH not set - using local allocator (offline rehearsal)%s" % (AMBER, RESET))
+        tokens, method = count_prompt_tokens(prompt)
+        note("prompt is %d tokens (%s); budget 5000/min" % (tokens, method))
 
     # A driver can only take one load: keep the model's pick while the driver is
     # still free, otherwise fall back to the global allocation for that shipment.
