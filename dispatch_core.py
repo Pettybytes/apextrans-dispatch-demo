@@ -42,6 +42,14 @@ ENDORSEMENT_FOR_LOAD = {
     "Hazmat": "Hazmat",
 }
 
+# Only out-of-service-grade defects block a dispatch. Anything else is a note.
+BLOCKING_DEFECT_MARKERS = ("brake", "tire", "light", "reefer", "abs", "air bag")
+
+
+def is_blocking_defect(defect):
+    text = (defect or "").lower()
+    return any(marker in text for marker in BLOCKING_DEFECT_MARKERS)
+
 TERMINAL_FIELDS = ("terminal_code", "city", "state", "lat", "lon")
 SHIPMENT_KEY = "shipment_id"
 DRIVER_KEY = "driver_id"
@@ -315,7 +323,7 @@ class Dispatch:
             defect = (truck.get("open_defect") or "").strip()
             if (truck.get("status") or "").strip() == "Out of service":
                 conflicts.append("Truck out of service: %s" % (defect or "no defect recorded"))
-            if defect:
+            if defect and is_blocking_defect(defect):
                 if load_type == "Reefer" and "reefer" in defect.lower():
                     conflicts.append(
                         "Reefer unit fault on truck %s: %s. Trailer cannot hold temperature for this load"
@@ -326,6 +334,11 @@ class Dispatch:
                         "Open defect on truck %s: %s. Must be repaired before dispatch"
                         % (truck.get("truck_id"), defect)
                     )
+            elif defect:
+                notes.append(
+                    "Minor defect on truck %s: %s (does not block dispatch)"
+                    % (truck.get("truck_id"), defect)
+                )
 
         eta = self.new_eta(shipment, deadhead, extra_hours)
 

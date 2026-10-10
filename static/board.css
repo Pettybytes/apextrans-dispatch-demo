@@ -187,6 +187,13 @@ body {
   font-family: inherit;
 }
 .chip.on { border-color: var(--amber); color: var(--amber); background: rgba(245,165,36,.08); }
+.chip.toggle { margin-left: auto; }
+
+/* the two lower panels match height; their bodies scroll inside the card */
+.grid-2 > .panel { display: flex; flex-direction: column; }
+.grid-2 > .panel > .panel-body { flex: 1 1 auto; min-height: 0; }
+.panel-body.scroll { max-height: 520px; overflow-y: auto; }
+.legend i.dash { width: 16px; height: 0; border-top: 2px dashed #F5A524; border-radius: 0; background: transparent; }
 .who {
   font-size: 10.5px;
   letter-spacing: .06em;

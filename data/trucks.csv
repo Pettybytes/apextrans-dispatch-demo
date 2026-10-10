@@ -1,11 +1,11 @@
 truck_id,terminal,equipment,status,open_defect,last_inspection_utc
 TRK-1001,CHI,Dry Van 53ft,In service,,2026-09-21T07:00Z
-TRK-1002,MEM,Reefer 53ft,In service,reefer unit fault,2026-09-27T03:00Z
-TRK-1003,DAL,Flatbed 48ft,In service,,2026-09-08T21:00Z
+TRK-1002,MEM,Reefer 53ft,Out of service,reefer unit fault,2026-09-27T03:00Z
+TRK-1003,DAL,Flatbed 48ft,In service,cracked mirror,2026-09-08T21:00Z
 TRK-1004,DEN,Dry Van 53ft,Out of service,brake air leak,2026-09-11T16:00Z
 TRK-1005,ATL,Reefer 53ft,In service,,2026-10-06T00:00Z
-TRK-1006,KCK,Dry Van 53ft,In service,lights inoperative,2026-10-05T16:00Z
-TRK-1007,STL,Flatbed 48ft,In service,tire tread below limit,2026-09-04T06:00Z
+TRK-1006,KCK,Dry Van 53ft,Out of service,lights inoperative,2026-10-05T16:00Z
+TRK-1007,STL,Flatbed 48ft,Out of service,tire tread below limit,2026-09-04T06:00Z
 TRK-1008,NSH,Dry Van 53ft,In service,,2026-09-22T08:00Z
 TRK-1009,PHX,Reefer 53ft,In service,,2026-09-06T22:00Z
 TRK-1010,HAR,Dry Van 53ft,In service,,2026-09-30T19:00Z
@@ -16,15 +16,15 @@ TRK-1014,DET,Reefer 53ft,In service,,2026-09-10T23:00Z
 TRK-1015,CHI,Flatbed 48ft,In service,,2026-10-11T06:00Z
 TRK-1016,DET,Flatbed 48ft,In service,,2026-10-07T14:00Z
 TRK-1017,STL,Flatbed 48ft,In service,,2026-09-18T15:00Z
-TRK-1018,OAK,Dry Van 53ft,In service,lights inoperative,2026-09-26T16:00Z
+TRK-1018,OAK,Dry Van 53ft,In service,low coolant warning,2026-09-30T06:00Z
 TRK-1019,ABQ,Flatbed 48ft,In service,,2026-09-05T04:00Z
-TRK-1020,HOU,Dry Van 53ft,In service,tire tread below limit,2026-09-20T04:00Z
+TRK-1020,HOU,Dry Van 53ft,In service,worn wiper blades,2026-09-20T04:00Z
 TRK-1021,STL,Reefer 53ft,In service,,2026-09-04T04:00Z
 TRK-1022,PHX,Reefer 53ft,In service,,2026-10-06T08:00Z
-TRK-1023,MSP,Dry Van 53ft,In service,tire tread below limit,2026-10-06T04:00Z
+TRK-1023,MSP,Dry Van 53ft,In service,worn wiper blades,2026-10-06T04:00Z
 TRK-1024,COL,Flatbed 48ft,In service,,2026-09-05T07:00Z
 TRK-1025,CHI,Dry Van 53ft,In service,,2026-09-20T05:00Z
-TRK-1026,COL,Flatbed 48ft,In service,faulty abs sensor,2026-10-11T06:00Z
+TRK-1026,COL,Flatbed 48ft,In service,cracked mirror,2026-10-11T06:00Z
 TRK-1027,STL,Flatbed 48ft,In service,,2026-09-21T02:00Z
 TRK-1028,MSP,Reefer 53ft,In service,,2026-09-29T09:00Z
 TRK-1029,DAL,Reefer 53ft,In service,low coolant warning,2026-09-15T01:00Z
@@ -37,13 +37,13 @@ TRK-1035,JAX,Reefer 53ft,In service,,2026-09-21T08:00Z
 TRK-1036,DAL,Dry Van 53ft,In service,,2026-09-11T04:00Z
 TRK-1037,DEN,Flatbed 48ft,In service,,2026-09-28T18:00Z
 TRK-1038,PHX,Flatbed 48ft,In service,,2026-10-03T22:00Z
-TRK-1039,NWK,Flatbed 48ft,In service,faulty abs sensor,2026-09-22T14:00Z
+TRK-1039,NWK,Flatbed 48ft,In service,cracked mirror,2026-09-22T14:00Z
 TRK-1040,PHX,Dry Van 53ft,In service,,2026-10-11T20:00Z
 TRK-1041,DAL,Flatbed 48ft,In service,,2026-09-25T18:00Z
 TRK-1042,DEN,Flatbed 48ft,In service,,2026-09-05T12:00Z
 TRK-1043,HOU,Reefer 53ft,In service,,2026-09-17T08:00Z
 TRK-1044,HOU,Reefer 53ft,In service,,2026-09-08T18:00Z
-TRK-1045,STL,Dry Van 53ft,Out of service,reefer unit fault,2026-10-09T08:00Z
+TRK-1045,STL,Dry Van 53ft,Out of service,lights inoperative,2026-10-09T08:00Z
 TRK-1046,ABQ,Reefer 53ft,In service,,2026-09-06T03:00Z
 TRK-1047,ELP,Flatbed 48ft,In service,,2026-09-14T01:00Z
 TRK-1048,DAL,Flatbed 48ft,In service,cracked mirror,2026-09-14T13:00Z
@@ -74,7 +74,7 @@ TRK-1072,JAX,Dry Van 53ft,In service,,2026-09-28T07:00Z
 TRK-1073,COL,Reefer 53ft,In service,low coolant warning,2026-10-09T16:00Z
 TRK-1074,STL,Dry Van 53ft,In service,,2026-10-03T07:00Z
 TRK-1075,NSH,Dry Van 53ft,In service,,2026-10-06T09:00Z
-TRK-1076,HOU,Reefer 53ft,Out of service,lights inoperative,2026-09-13T04:00Z
+TRK-1076,HOU,Reefer 53ft,Out of service,reefer unit fault,2026-09-13T04:00Z
 TRK-1077,NSH,Reefer 53ft,In service,,2026-09-06T07:00Z
 TRK-1078,PHX,Reefer 53ft,In service,,2026-10-03T21:00Z
 TRK-1079,KCK,Reefer 53ft,In service,,2026-10-11T03:00Z

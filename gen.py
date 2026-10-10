@@ -64,20 +64,28 @@ PINNED_HOS = {
 
 PINNED_TRUCKS = {
     # driver_id: (status, open_defect)
-    "DRV-1001": ("In service", ""),
-    "DRV-1002": ("In service", "reefer unit fault"),
-    "DRV-1003": ("In service", ""),
+    "DRV-1001": ("In service", ""),                 # clean, so APX-2610177 auto-applies
+    "DRV-1002": ("Out of service", "reefer unit fault"),
+    "DRV-1003": ("In service", "cracked mirror"),   # minor: a note, never a conflict
     "DRV-1004": ("Out of service", "brake air leak"),
     "DRV-1005": ("In service", ""),
-    "DRV-1006": ("In service", "lights inoperative"),
-    "DRV-1007": ("In service", "tire tread below limit"),
+    "DRV-1006": ("Out of service", "lights inoperative"),
+    "DRV-1007": ("Out of service", "tire tread below limit"),
     "DRV-1008": ("In service", ""),
-    "DRV-1009": ("In service", ""),      # must be clean for APX-2610161
-    "DRV-1010": ("In service", ""),      # clean, so APX-2610179 is only a mismatch
+    "DRV-1009": ("In service", ""),                 # clean, so APX-2610161 auto-applies
+    "DRV-1010": ("In service", ""),                 # clean, so APX-2610179 is only a mismatch
 }
 
-DEFECTS = ["brake air leak", "tire tread below limit", "reefer unit fault", "lights inoperative"]
-OTHER_DEFECTS = ["air bag leak", "worn wiper blades", "cracked mirror", "faulty abs sensor", "low coolant warning"]
+# Defects that ground a tractor, and the minor ones that only earn a note.
+BLOCKING_DEFECTS = ["brake air leak", "tire tread below limit", "lights inoperative",
+                    "reefer unit fault", "air bag leak", "faulty abs sensor"]
+MINOR_DEFECTS = ["worn wiper blades", "cracked mirror", "low coolant warning"]
+BLOCKING_MARKERS = ("brake", "tire", "light", "reefer", "abs", "air bag")
+
+
+def is_blocking_defect(defect):
+    text = (defect or "").lower()
+    return any(marker in text for marker in BLOCKING_MARKERS)
 
 # Terminals where a new Available driver would break a story beat, so the
 # generated available pool deliberately skips them.
@@ -254,11 +262,14 @@ def main():
         if driver["driver_id"] in PINNED_TRUCKS:
             status, defect = PINNED_TRUCKS[driver["driver_id"]]
         elif rng.random() < 0.06:
-            status, defect = "Out of service", rng.choice(DEFECTS)
+            status, defect = "Out of service", rng.choice(BLOCKING_DEFECTS)
         elif rng.random() < 0.18:
-            status, defect = "In service", rng.choice(DEFECTS + OTHER_DEFECTS)
+            status, defect = "In service", rng.choice(MINOR_DEFECTS)
         else:
             status, defect = "In service", ""
+        # the status always matches the defect: a blocking defect grounds the truck
+        if defect and is_blocking_defect(defect):
+            status = "Out of service"
         trucks.append({
             "truck_id": driver["truck_id"],
             "terminal": driver["home_terminal"],

@@ -19,6 +19,7 @@
     audit: [],
     shipments: {},          // shipment_id -> full record (terminals, margin)
     squads: null,
+    showReads: false,
     filter: 'All',
     ok: true
   };
@@ -274,7 +275,6 @@
       svg.appendChild(svgEl('text', { x: PADL - 8, y: y(v) + 4, fill: '#8A94A7', 'font-size': 11, 'text-anchor': 'end' }, '$' + num(Math.round(v))));
     });
     svg.appendChild(svgEl('line', { x1: PADL, x2: W - PADR, y1: y(LIMIT), y2: y(LIMIT), stroke: '#F5A524', 'stroke-width': 1.5, 'stroke-dasharray': '6 5' }));
-    svg.appendChild(svgEl('text', { x: W - PADR, y: y(LIMIT) - 7, fill: '#F5A524', 'font-size': 11, 'text-anchor': 'end' }, 'Approval limit $500'));
 
     if (!items.length) {
       svg.appendChild(svgEl('text', {
@@ -368,80 +368,108 @@
     }).join('');
   }
 
-  /* Who did it, in one word, for the feed label and the filter chips. */
-  function actorLabel(actor) {
-    var a = String(actor || '').toLowerCase();
-    if (a.indexOf('agent') >= 0) return 'Copilot';
-    if (a.indexOf('supervisor') >= 0) return 'Supervisor';
-    if (a.indexOf('support') >= 0) return 'Support';
-    if (a.indexOf('compliance') >= 0) return 'Compliance';
-    return 'Dispatcher';
+  /* Labels are one of five: the four squads, or an unverified direct caller. */
+  function identityLabel(who) {
+    var key = String(who || '').toLowerCase();
+    if (key.indexOf('supervisor') >= 0) return 'dispatch-supervisor';
+    if (key.indexOf('support') >= 0) return 'support-bot';
+    if (key.indexOf('compliance') >= 0) return 'compliance-docs';
+    if (key.indexOf('agent') >= 0 || key.indexOf('copilot') >= 0) return 'dispatch-copilot';
+    return 'direct (unverified)';
   }
 
-  var FILTERS = ['All', 'Copilot', 'Supervisor', 'Support', 'Compliance'];
+  var FILTERS = ['All', 'dispatch-copilot', 'dispatch-supervisor', 'support-bot', 'compliance-docs'];
 
-  /* Applied reroutes from /updates, interleaved with attributed reads from /audit. */
-  function feedItems() {
+  function driverTag(id) {
+    if (!id) return '';
+    return (driverName(id) || id) + ' (' + id + ')';
+  }
+
+  /* Decisions and refusals by default. Reads are opt-in, and grouped when shown. */
+  function feedItems(includeReads) {
     var out = [];
-    state.updates.forEach(function (u) {
-      out.push({
-        ts: u.ts_utc,
-        subject: u.shipment_id,
-        who: actorLabel(u.actor),
-        driver: u.driver_name ? (u.driver_name + ' (' + u.driver_id + ')') : '',
-        word: 'Applied',
-        cls: 'recovered'
-      });
-    });
     state.audit.forEach(function (a) {
-      if (a.event !== 'read.lookup') return;
-      out.push({
-        ts: a.ts_utc,
-        subject: a.subject || '',
-        who: actorLabel(a.identity),
-        driver: '',
-        word: 'Read',
-        cls: 'waiting'
-      });
+      var ev = a.event;
+      if (ev === 'proposal.created') {
+        out.push({ ts: a.ts_utc, who: identityLabel(a.actor), subject: a.shipment_id || '',
+                   what: a.decision === 'auto_applied' ? 'Auto-applied' : 'Proposed',
+                   detail: driverTag(a.new_driver_id),
+                   cls: a.decision === 'auto_applied' ? 'recovered' : 'waiting' });
+      } else if (ev === 'proposal.approved') {
+        out.push({ ts: a.ts_utc, who: identityLabel(a.approver), subject: a.shipment_id || '',
+                   what: 'Approved', detail: '', cls: 'approved' });
+      } else if (ev === 'shipment.rerouted') {
+        out.push({ ts: a.ts_utc, who: identityLabel(a.actor), subject: a.shipment_id || '',
+                   what: 'Applied', detail: driverTag(a.new_driver_id), cls: 'recovered' });
+      } else if (ev === 'write.blocked') {
+        out.push({ ts: a.ts_utc, who: 'direct (unverified)', subject: a.client_ip || '',
+                   what: 'Refused', detail: (a.path || '') + ' blocked write', cls: 'waiting' });
+      }
     });
+
+    if (includeReads) {
+      var groups = {};
+      state.audit.forEach(function (a) {
+        if (a.event !== 'read.lookup') return;
+        var who = identityLabel(a.identity);
+        var key = who + '|' + (a.subject || '');
+        if (!groups[key]) groups[key] = { ts: a.ts_utc, who: who, subject: a.subject || '', count: 0 };
+        groups[key].count += 1;
+        if (String(a.ts_utc) > String(groups[key].ts)) groups[key].ts = a.ts_utc;
+      });
+      Object.keys(groups).forEach(function (k) {
+        var g = groups[k];
+        out.push({ ts: g.ts, who: g.who, subject: g.subject,
+                   what: 'Read' + (g.count > 1 ? ' x' + g.count : ''), detail: '', cls: 'waiting' });
+      });
+    }
+
     out.sort(function (x, y) { return String(y.ts).localeCompare(String(x.ts)); });
     return out;
   }
 
   function renderActivity() {
-    var all = feedItems();
+    var all = feedItems(state.showReads);
     var feed = state.filter === 'All' ? all : all.filter(function (i) { return i.who === state.filter; });
     $('actCount').textContent = feed.length + (feed.length === 1 ? ' event' : ' events');
 
     var chips = '<div class="chips">' + FILTERS.map(function (name) {
       return '<button class="chip' + (state.filter === name ? ' on' : '') +
              '" data-filter="' + name + '">' + name + '</button>';
-    }).join('') + '</div>';
+    }).join('') +
+      '<button class="chip toggle' + (state.showReads ? ' on' : '') + '" id="showReads">Show reads</button></div>';
 
-    var rows = feed.slice(0, 8).map(function (i) {
+    var rows = feed.slice(0, 20).map(function (i) {
       return '' +
         '<div class="row">' +
           '<span class="t num">' + esc(hhmm(i.ts)) + 'Z</span>' +
           '<span class="who">' + esc(i.who) + '</span>' +
           '<span class="s">' + esc(i.subject) + '</span>' +
-          '<span class="d">' + esc(i.driver) + '</span>' +
-          '<span class="st ' + i.cls + '">' + esc(i.word) + '</span>' +
+          '<span class="d">' + esc(i.detail) + '</span>' +
+          '<span class="st ' + i.cls + '">' + esc(i.what) + '</span>' +
         '</div>';
     }).join('');
 
     if (!rows) {
       rows = '<div class="empty">' + (state.filter === 'All'
-        ? 'Nothing yet. Reroutes and attributed lookups land here.'
+        ? 'Nothing yet. Decisions and refusals land here; reads are behind the toggle.'
         : 'Nothing from ' + esc(state.filter) + ' yet.') + '</div>';
     }
 
     $('activity').innerHTML = chips + rows;
-    Array.prototype.forEach.call(document.querySelectorAll('#activity .chip'), function (button) {
+    Array.prototype.forEach.call(document.querySelectorAll('#activity .chip[data-filter]'), function (button) {
       button.addEventListener('click', function () {
         state.filter = button.getAttribute('data-filter');
         renderActivity();
       });
     });
+    var toggle = document.getElementById('showReads');
+    if (toggle) {
+      toggle.addEventListener('click', function () {
+        state.showReads = !state.showReads;
+        renderActivity();
+      });
+    }
   }
 
   function renderSquads() {
