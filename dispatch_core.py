@@ -350,7 +350,7 @@ class Dispatch:
         proposal["applied_by"] = actor
 
         eta_hhmm = proposal["new_eta_utc"][11:16]
-        message = "%s reassigned to %s (%s). New ETA %s UTC. Customer notified." % (
+        message = "%s reassigned to %s (%s). New ETA %s UTC. Dispatcher notified." % (
             proposal["shipment_id"],
             driver["name"],
             driver[DRIVER_KEY],

@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ApexTrans Logistics - Dispatch Control</title>
+<link rel="stylesheet" href="/static/vendor/tabler/tabler.min.css">
+<link rel="stylesheet" href="/static/board.css">
+</head>
+<body>
+
+<!-- Tabler outline icons are inlined from @tabler/icons (MIT). One icon per section header. -->
+
+<header class="topbar">
+  <svg class="brand-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+    <path d="M16 2.5 27.5 9v14L16 29.5 4.5 23V9z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+    <path d="M10 20.5 16 8l6 12.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <span class="wordmark">APEXTRANS LOGISTICS</span>
+  <span class="brand-sub">Dispatch Control</span>
+  <div class="topbar-right">
+    <span class="live"><span class="live-dot" id="liveDot"></span><span id="liveText">polling every 3s</span></span>
+    <span class="num" id="runTime">-</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section class="grid-kpi" id="kpis"></section>
+
+  <section class="grid-2">
+    <div class="panel">
+      <div class="panel-head">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 13a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -6" /><path d="M15 9a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -10" /><path d="M9 5a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -14" /><path d="M4 20h14" /></svg>
+        <span>Reroute cost per shipment</span>
+      </div>
+      <div class="panel-body"><div id="costChart"></div></div>
+      <div class="legend">
+        <span><i style="background:#F5A524"></i>within the $500 approval limit</span>
+        <span><i style="background:#D63939"></i>over the limit</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 13a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -6" /><path d="M15 9a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -10" /><path d="M9 5a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -14" /><path d="M4 20h14" /></svg>
+        <span>Driver hours: needed vs left</span>
+      </div>
+      <div class="panel-body"><div id="hoursChart"></div></div>
+      <div class="legend">
+        <span><i style="background:#8A94A7"></i>hours needed for the move</span>
+        <span><i style="background:#2FB344"></i>driver has enough</span>
+        <span><i style="background:#D63939"></i>shortfall</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" style="margin-top:14px">
+    <div class="panel-head">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4" /><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0" /><path d="M12 16h.01" /></svg>
+      <span>Shipment exceptions</span>
+      <span class="count" id="exCount"></span>
+    </div>
+    <div class="grid-ex" id="exGrid"></div>
+  </section>
+
+  <section class="grid-2">
+    <div class="panel">
+      <div class="panel-head">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M12 12l3 2" /><path d="M12 7v5" /></svg>
+        <span>Approvals queue</span>
+        <span class="count" id="qCount"></span>
+      </div>
+      <div class="panel-body" id="queue"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l3 8l4 -16l3 8h4" /></svg>
+        <span>Live activity</span>
+        <span class="count" id="actCount"></span>
+      </div>
+      <div class="panel-body" id="activity"></div>
+    </div>
+  </section>
+
+  <section class="panel" style="margin-top:14px">
+    <div class="panel-head">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.615 20h-2.615a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v8" /><path d="M14 19l2 2l4 -4" /><path d="M9 8h4" /><path d="M9 12h2" /></svg>
+        <span>Demo checklist</span>
+        <span class="count" id="ckCount"></span>
+      </div>
+      <div class="panel-body" id="checklist"></div>
+  </section>
+
+  <section class="panel" style="margin-top:14px">
+    <div class="panel-head">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /><path d="M21 21v-2a4 4 0 0 0 -3 -3.85" /></svg>
+        <span id="squadsTitle">Who can do what · enforced by Kong AI Gateway</span>
+      </div>
+      <div id="squads"></div>
+      <div class="squads-note" id="squadsNote"></div>
+  </section>
+
+  <div class="foot-gap"></div>
+</div>
+
+<footer class="strip">ApexTrans Logistics · demo build · all figures are synthetic · no customer data is used</footer>
+
+<script src="/static/vendor/tabler/tabler.min.js"></script>
+<script src="/static/board.js"></script>
+</body>
+</html>

@@ -10,6 +10,8 @@ WORKDIR /app
 COPY requirements.txt .
 COPY dispatch_core.py app.py openapi.json ./
 COPY data/ ./data/
+COPY static/ ./static/
+COPY config/ ./config/
 COPY approval_limits.md ./
 
 EXPOSE 8090

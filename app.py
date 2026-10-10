@@ -21,6 +21,19 @@ from dispatch_core import Dispatch, DispatchError, HERE
 PORT = int(os.environ.get("PORT", "8090"))
 HOST = os.environ.get("HOST", "0.0.0.0")
 OPENAPI_PATH = os.path.join(HERE, "openapi.json")
+STATIC_DIR = os.path.join(HERE, "static")
+CONFIG_DIR = os.path.join(HERE, "config")
+
+CONTENT_TYPES = {
+    ".html": "text/html; charset=utf-8",
+    ".css": "text/css; charset=utf-8",
+    ".js": "application/javascript; charset=utf-8",
+    ".json": "application/json; charset=utf-8",
+    ".svg": "image/svg+xml",
+    ".woff2": "font/woff2",
+    ".woff": "font/woff",
+    ".ico": "image/x-icon",
+}
 
 DISPATCH = Dispatch()
 
@@ -63,6 +76,30 @@ class Handler(BaseHTTPRequestHandler):
             raise DispatchError("JSON body must be an object", 400)
         return payload
 
+    def _send_file(self, full_path, status=200):
+        try:
+            with open(full_path, "rb") as handle:
+                body = handle.read()
+        except OSError:
+            return self._error("not found", 404)
+        content_type = CONTENT_TYPES.get(os.path.splitext(full_path)[1].lower(), "application/octet-stream")
+        self.send_response(status)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        self.wfile.write(body)
+
+    def _send_static(self, relative, root):
+        """Serve a file from a directory, refusing anything that escapes it."""
+        safe = os.path.normpath(unquote(relative)).lstrip("/")
+        if safe.startswith("..") or os.path.isabs(safe):
+            return self._error("bad path", 400)
+        full = os.path.join(root, safe)
+        if not os.path.isfile(full):
+            return self._error("not found", 404)
+        return self._send_file(full)
+
     # ---- routes -----------------------------------------------------------
     def do_GET(self):
         parsed = urlparse(self.path)
@@ -75,6 +112,7 @@ class Handler(BaseHTTPRequestHandler):
                         "service": "apex-dispatch",
                         "version": "1.0",
                         "endpoints": [
+                            "/board",
                             "/health",
                             "/exceptions",
                             "/shipments/{shipment_id}",
@@ -86,6 +124,14 @@ class Handler(BaseHTTPRequestHandler):
                         ],
                     }
                 )
+            # The demo board is a read-only HTML view, not a gateway tool: it is
+            # deliberately absent from openapi.json so Kong never exposes it.
+            if path == "/board":
+                return self._send_file(os.path.join(STATIC_DIR, "board.html"))
+            if path.startswith("/static/"):
+                return self._send_static(path[len("/static/"):], STATIC_DIR)
+            if path.startswith("/config/"):
+                return self._send_static(path[len("/config/"):], CONFIG_DIR)
             if path == "/health":
                 return self._send_json({"ok": True})
             if path == "/openapi.json":

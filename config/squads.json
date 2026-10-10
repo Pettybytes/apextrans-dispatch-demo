@@ -1,0 +1,36 @@
+{
+  "_comment": "Static squad access panel for the demo board. Rendered by /board from this file - no Konnect calls, no keys. Edit a value here and reload the page to see it change.",
+  "title": "Who can do what · enforced by Kong AI Gateway",
+  "identities": [
+    {
+      "identity": "support-bot",
+      "team": "Customer support",
+      "token_limit": "100 tokens/min",
+      "dispatch_tools": "None",
+      "can_approve": "No"
+    },
+    {
+      "identity": "dispatch-copilot",
+      "team": "Dispatch (AI agent)",
+      "token_limit": "5,000 tokens/min",
+      "dispatch_tools": "7 (view + propose)",
+      "can_approve": "No",
+      "in_use": true
+    },
+    {
+      "identity": "compliance-docs",
+      "team": "Compliance",
+      "token_limit": "2,000 tokens/min",
+      "dispatch_tools": "None",
+      "can_approve": "No"
+    },
+    {
+      "identity": "dispatch-supervisor",
+      "team": "Dispatch (human approver)",
+      "token_limit": "No limit",
+      "dispatch_tools": "8 (includes approve)",
+      "can_approve": "Yes, human only"
+    }
+  ],
+  "footer_note": "All four share one gateway URL and three AI models (GPT-4o, Claude, Llama via OpenRouter). Every request passes PII protection and Prompt Guard. Live usage and estimated cost per squad: Konnect › Observability › Explorer."
+}
