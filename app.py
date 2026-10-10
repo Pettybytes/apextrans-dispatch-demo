@@ -9,6 +9,7 @@ Run:  python3 app.py            (listens on 0.0.0.0:8090)
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
@@ -57,6 +58,22 @@ def kong_data_plane_ip(force=False):
                 _kong_ip = None
         return _kong_ip
 
+
+def asset_version():
+    """Short token from the board assets' size and mtime, for cache-busting.
+
+    /board stamps this into the CSS and JS URLs, so a rebuilt board never
+    serves a stale stylesheet or script out of the browser cache.
+    """
+    stamps = []
+    for name in ("board.css", "board.js"):
+        try:
+            info = os.stat(os.path.join(STATIC_DIR, name))
+            stamps.append("%d:%d" % (info.st_size, info.st_mtime_ns))
+        except OSError:
+            stamps.append(name + "-missing")
+    return hashlib.sha1("|".join(stamps).encode("utf-8")).hexdigest()[:10]
+
 CONTENT_TYPES = {
     ".html": "text/html; charset=utf-8",
     ".css": "text/css; charset=utf-8",
@@ -100,14 +117,27 @@ class Handler(BaseHTTPRequestHandler):
     def _identity(self):
         """Consumer identity the gateway forwarded, plus the header names seen.
 
+        The header is only trusted when the request really came from the Kong
+        data plane - the same address the write guard accepts. From anywhere
+        else it can be forged, so we ignore it and label the caller
+        "direct (unverified)" instead of believing it.
+
         Only header NAMES are recorded for diagnosis - never their values.
         """
         names = sorted(self.headers.keys())
+        presented = ""
         for header in CONSUMER_HEADERS:
             value = (self.headers.get(header) or "").strip()
             if value:
-                return value, names
-        return "direct", names
+                presented = value
+                break
+        client = self._client_ip()
+        trusted = bool(client) and (
+            client == kong_data_plane_ip() or client == kong_data_plane_ip(force=True)
+        )
+        if not trusted:
+            return ("direct (unverified)" if presented else "direct"), names
+        return (presented or "direct"), names
 
     def _record_read(self, path):
         """Attribute a read to its caller, when the gateway named one.
@@ -158,6 +188,21 @@ class Handler(BaseHTTPRequestHandler):
         if not isinstance(payload, dict):
             raise DispatchError("JSON body must be an object", 400)
         return payload
+
+    def _send_board(self):
+        """Serve the board with a cache-busting version on its assets."""
+        try:
+            with open(os.path.join(STATIC_DIR, "board.html"), encoding="utf-8") as handle:
+                markup = handle.read()
+        except OSError:
+            return self._error("not found", 404)
+        body = markup.replace("__ASSET_VERSION__", asset_version()).encode("utf-8")
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        self.wfile.write(body)
 
     def _send_file(self, full_path, status=200):
         try:
@@ -211,7 +256,7 @@ class Handler(BaseHTTPRequestHandler):
             # The demo board is a read-only HTML view, not a gateway tool: it is
             # deliberately absent from openapi.json so Kong never exposes it.
             if path == "/board":
-                return self._send_file(os.path.join(STATIC_DIR, "board.html"))
+                return self._send_board()
             if path.startswith("/static/"):
                 return self._send_static(path[len("/static/"):], STATIC_DIR)
             if path.startswith("/config/"):

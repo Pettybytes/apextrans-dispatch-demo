@@ -4,23 +4,39 @@
 # read exceptions and propose/approve reroutes without knowing anything about
 # the gateway. One tool per operationId in openapi.json, except get_health.
 #
+# APPLY WITH (Bryan runs this - the assistant never runs kongctl):
+#
+#     cd ~/apextrans-demo/dispatch
+#     AI_GATEWAY_ID=<your-gateway-id> kongctl apply -f kong/apex-dispatch-mcp.yaml
+#
+# No --auto-approve: check the diff it prints, then confirm. If your kongctl
+# build wants a different verb for declarative files, `kongctl --help` will
+# say so - the file itself is standard declarative syntax.
+#
+# Then verify the per-identity tool counts:
+#
+#     python3 kong/check_tool_access.py
+#
+# Expected tools per identity: support-bot 2, dispatch-copilot 7,
+# compliance-docs 2, dispatch-supervisor 8.
+#
 # ---------------------------------------------------------------------------
 # TWO FIELD NAMES I WAS LEAST SURE ABOUT (verify against your kongctl/Konnect
 # version before applying):
 #   1. `config.route.paths` - the documented Petstore sample shows `route.paths`
-#      as a list, but the rest of the `route` object is undocumented, so confirm
-#      the conversion-listener really wants a list of proxy paths there.
+#      as a list, but the rest of the `route` object is undocumented.
 #   2. `access.acls.allow` on a single tool - the sample only shows the
-#      server-level `access.default_tool_acls`; the per-tool `access` block used
-#      on `approve_reroute` (to restrict it to dispatch-supervisor) does not
-#      appear in that sample, so `access > acls > allow` is my best reading of
-#      its nesting.
+#      server-level `access.default_tool_acls`; the per-tool `access` block is
+#      not shown there, so `access > acls > allow` is my reading of its nesting.
 # ---------------------------------------------------------------------------
 #
 # Note from Kong: tool arguments are renamed `{in}_{name}`, so path
 # `shipment_id` arrives as `path_shipment_id` and query `status` as `query_status`.
-# Body fields collapse into a single `body` property. exception_agent.py already
-# uses those names when it talks through the gateway.
+# Body fields collapse into a single `body` property.
+#
+# Every tool now carries an explicit `access.acls.allow` list. Nothing is left
+# to the server-level default, so the counts above are the counts the gateway
+# enforces.
 
 ai_gateway_mcp_servers:
   - ref: apex-dispatch-mcp
@@ -51,11 +67,17 @@ ai_gateway_mcp_servers:
         description: List the shipment exceptions that are open and waiting on a dispatch decision.
         method: GET
         path: "/apex-dispatch/exceptions"
+        access:
+          acls:
+            allow: [dispatch-copilot, dispatch-supervisor]
 
       - name: get_shipment
         description: Get one shipment by id, including its customer, current driver, ETA and remaining miles.
         method: GET
         path: "/apex-dispatch/shipments/{shipment_id}"
+        access:
+          acls:
+            allow: [dispatch-copilot, dispatch-supervisor, support-bot]
         parameters:
           - name: shipment_id
             in: path
@@ -67,6 +89,9 @@ ai_gateway_mcp_servers:
         description: List drivers who are available to take a load, optionally filtered by terminal, equipment or endorsement; pass shipment_id to also get each driver's deadhead miles, reroute cost and equipment/endorsement match.
         method: GET
         path: "/apex-dispatch/drivers/available"
+        access:
+          acls:
+            allow: [dispatch-copilot, dispatch-supervisor]
         parameters:
           - name: terminal
             in: query
@@ -93,6 +118,9 @@ ai_gateway_mcp_servers:
         description: List the reroute proposals that are held and waiting for a human to approve them.
         method: GET
         path: "/apex-dispatch/reroutes"
+        access:
+          acls:
+            allow: [dispatch-copilot, dispatch-supervisor]
         parameters:
           - name: status
             in: query
@@ -104,6 +132,9 @@ ai_gateway_mcp_servers:
         description: Propose moving a shipment to a different driver; it applies automatically when there are no rule conflicts and the cost is within the limit, otherwise it is held for a human.
         method: POST
         path: "/apex-dispatch/reroutes"
+        access:
+          acls:
+            allow: [dispatch-copilot, dispatch-supervisor]
         request_body:
           required: true
           content:
@@ -157,8 +188,14 @@ ai_gateway_mcp_servers:
         description: List the applied reroutes and the customer-facing ETA message for each, newest first.
         method: GET
         path: "/apex-dispatch/updates"
+        access:
+          acls:
+            allow: [dispatch-copilot, dispatch-supervisor, support-bot, compliance-docs]
 
       - name: list_audit
         description: List every proposal, decision and approval with UTC timestamps, newest first.
         method: GET
         path: "/apex-dispatch/audit"
+        access:
+          acls:
+            allow: [dispatch-copilot, dispatch-supervisor, compliance-docs]

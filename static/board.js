@@ -444,64 +444,18 @@
     });
   }
 
-  function renderChecklist(rows) {
-    var withProposal = rows.filter(function (r) { return r.p; }).length;
-    var allIn = rows.length > 0 && withProposal === rows.length;
-    var approved = state.audit.some(function (a) { return a.event === 'proposal.approved'; });
-    var r149 = rows.filter(function (r) { return r.e.shipment_id === 'APX-2610149'; })[0];
-
-    var r149waiting = !!(r149 && r149.p && r149.status === 'waiting');
-    var items = [
-      {
-        done: allIn,
-        title: 'Copilot proposed a reroute for every exception',
-        note: withProposal + ' of ' + rows.length + ' exceptions have a proposal',
-        amber: false
-      },
-      {
-        done: allIn && r149waiting,
-        title: "Copilot can't approve: APX-2610149 stays waiting",
-        note: r149waiting ? 'Still waiting for a dispatcher. The copilot has no approval tool.'
-                          : (r149 && r149.p ? 'APX-2610149 is no longer waiting.'
-                                            : 'No proposal for APX-2610149 yet.'),
-        amber: true
-      },
-      {
-        done: approved,
-        title: 'Only a human can approve',
-        note: approved ? 'A dispatcher approved a proposal in a separate session.'
-                       : 'No approval recorded yet.',
-        amber: false
-      }
-    ];
-
-    $('ckCount').textContent = items.filter(function (i) { return i.done; }).length + ' of ' + items.length;
-    var tick = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5l9 -13" /></svg>';
-    $('checklist').innerHTML = items.map(function (it, i) {
-      return '' +
-        '<div class="check' + (it.done ? ' done' : '') + '">' +
-          '<span class="n">' + (i + 1) + '</span>' +
-          '<span class="box">' + (it.done ? tick : '') + '</span>' +
-          '<span class="body">' +
-            '<span class="title">' + esc(it.title) + '</span>' +
-            '<div class="note' + (it.amber ? ' amber' : '') + '">' + esc(it.note) + '</div>' +
-          '</span>' +
-        '</div>';
-    }).join('');
-  }
-
   function renderSquads() {
     var s = state.squads;
     if (!s) return;
     if (s.title) $('squadsTitle').textContent = s.title;
-    var head = '<tr><th>Identity</th><th>Team</th><th>Token limit</th><th>Dispatch tools</th><th>Can approve</th></tr>';
+    var head = '<tr><th>Identity</th><th>Team</th><th>Token limit</th><th>Tools</th><th>Can approve</th></tr>';
     var body = (s.identities || []).map(function (i) {
       return '' +
         '<tr class="' + (i.in_use ? 'in-use' : '') + '">' +
           '<td class="id">' + esc(i.identity) + '</td>' +
           '<td class="sub">' + esc(i.team) + '</td>' +
           '<td class="num">' + esc(i.token_limit) + '</td>' +
-          '<td>' + esc(i.dispatch_tools) + '</td>' +
+          '<td>' + esc(i.tools) + '</td>' +
           '<td>' + esc(i.can_approve) + '</td>' +
         '</tr>';
     }).join('');
@@ -517,7 +471,6 @@
     renderExceptions(rows);
     renderQueue(rows);
     renderActivity();
-    renderChecklist(rows);
     renderSquads();
 
     $('liveText').textContent = state.ok ? 'polling every 3s' : 'connection lost - retrying';

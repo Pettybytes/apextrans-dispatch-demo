@@ -63,6 +63,26 @@ approval is skipped.
    → prints the saved server names only; `firecrawl-mcp`, `kong-konnect` and
    `Origin` must all still be there.
 
+## Kong wiring (once, before the panel)
+
+```bash
+cd ~/apextrans-demo/dispatch
+AI_GATEWAY_ID=<your-gateway-id> kongctl apply -f kong/apex-dispatch-mcp.yaml   # no --auto-approve
+python3 kong/check_tool_access.py
+python3 squad_activity.py --support APX-2610149
+python3 squad_activity.py --compliance
+```
+
+Expected tool counts, enforced by the explicit `access.acls.allow` lists in the
+YAML: **support-bot 2, dispatch-copilot 7, compliance-docs 2,
+dispatch-supervisor 8**. `check_tool_access.py` exits non-zero if any is wrong.
+Both squad scripts then show up in the board's live feed (read attribution only
+works for callers the gateway names - the header is trusted only from the Kong
+data plane).
+
+The board stamps a content hash onto `board.css` / `board.js`, so a rebuild is
+never served stale out of the browser cache.
+
 ## If this breaks
 
 - **Service down / connection refused on 8090** → `docker ps | grep apex-dispatch`; if it is missing rerun the start row, if it is unhealthy read `docker logs --tail 50 apex-dispatch`.

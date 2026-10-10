@@ -174,6 +174,21 @@ def main():
         " | ".join(events),
     )
 
+    # --- identity spoofing: a forged consumer header from a non-gateway IP ----
+    forged = urllib.request.Request(BASE + "/shipments/%s" % AUTO_SHIPMENT)
+    forged.add_header("X-Consumer-Username", "dispatch-copilot")
+    try:
+        urllib.request.urlopen(forged, timeout=10).read()
+    except urllib.error.HTTPError as exc:
+        exc.read()
+    _, audit_spoof = call("GET", "/audit", expect=200)
+    lookups = [a.get("message", "") for a in audit_spoof["audit"] if a.get("event") == "read.lookup"]
+    check(
+        "forged consumer header is logged as direct (unverified)",
+        ("direct (unverified) looked up %s" % AUTO_SHIPMENT) in lookups,
+        " | ".join(lookups[:3]) or "(no attributed reads)",
+    )
+
     _, approval_reject = call(
         "POST",
         "/reroutes/%s/approve" % held["proposal_id"],

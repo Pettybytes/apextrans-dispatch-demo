@@ -1,19 +1,19 @@
 {
-  "_comment": "Static squad access panel for the demo board. Rendered by /board from this file - no Konnect calls, no keys. Edit a value here and reload the page to see it change.",
+  "_comment": "Static squad access panel for the demo board. Rendered by /board from this file - no Konnect calls, no keys. The 'tools' counts must match the per-tool access.acls.allow lists in kong/apex-dispatch-mcp.yaml; kong/check_tool_access.py verifies them against the live gateway. Edit a value here and reload the page.",
   "title": "Who can do what · enforced by Kong AI Gateway",
   "identities": [
     {
       "identity": "support-bot",
       "team": "Customer support",
       "token_limit": "100 tokens/min",
-      "dispatch_tools": "None",
+      "tools": "2",
       "can_approve": "No"
     },
     {
       "identity": "dispatch-copilot",
       "team": "Dispatch (AI agent)",
       "token_limit": "5,000 tokens/min",
-      "dispatch_tools": "7 (view + propose)",
+      "tools": "7",
       "can_approve": "No",
       "in_use": true
     },
@@ -21,14 +21,14 @@
       "identity": "compliance-docs",
       "team": "Compliance",
       "token_limit": "2,000 tokens/min",
-      "dispatch_tools": "None",
+      "tools": "2",
       "can_approve": "No"
     },
     {
       "identity": "dispatch-supervisor",
       "team": "Dispatch (human approver)",
       "token_limit": "No limit",
-      "dispatch_tools": "8 (includes approve)",
+      "tools": "8",
       "can_approve": "Yes, human only"
     }
   ],
