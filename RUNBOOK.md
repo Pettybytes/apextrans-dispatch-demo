@@ -36,16 +36,14 @@ approval is skipped.
    `python3 check_acceptance.py`
    → 16 lines, ending `15/15 checks passed` and `ACCEPTANCE OK`
 
-3. **The story, offline (no gateway needed)**
+3. **Writes are gateway-only now** (this is the point, not a bug)
    `python3 exception_agent.py --direct --yes --reset`
-   → `--reset` just restarts the container first (`docker restart apex-dispatch`)
-   so **every run starts from fresh state**; it does not run the demo for you.
-   Then: 8 exceptions, `AUTO-APPLIED` / `HELD FOR HUMAN` lines with the blocking
-   reasons, and any `model pick X rejected (reason) -> using Y` lines. With the
-   shipped data at 55 mph expect **2 auto-applied, 6 held**.
-   Step 6 is human-only: at a keyboard it asks for the supervisor key and applies
-   one held proposal; run non-interactively it prints
-   `approval requires a human - skipped`. `--yes` never approves.
+   → `--reset` restarts the container first (`docker restart apex-dispatch`).
+   Reads work, so the tool list and the eight exceptions print, but the first
+   reroute is refused: `403 writes are only accepted through Kong AI Gateway`.
+   `--direct` reaches the service and gets nowhere, so use the gateway path
+   (step 4) for the full flow. Every refusal is written to `/audit` as
+   "blocked direct write from <ip>".
 
 4. **Through the gateway** (once the Kong tools are applied)
    `source ~/.kong/apextrans-squad-keys.env` (you run this, never Bentley)

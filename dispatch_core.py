@@ -350,7 +350,7 @@ class Dispatch:
         proposal["applied_by"] = actor
 
         eta_hhmm = proposal["new_eta_utc"][11:16]
-        message = "%s reassigned to %s (%s). New ETA %s UTC. Dispatcher notified." % (
+        message = "%s reassigned to %s (%s). New ETA %s UTC. Customer notified." % (
             proposal["shipment_id"],
             driver["name"],
             driver[DRIVER_KEY],
@@ -480,6 +480,16 @@ class Dispatch:
 
     def audit_log(self):
         return list(reversed(self.audit))
+
+    def blocked_write(self, client_ip, method, path):
+        """Record a write that arrived from outside the gateway."""
+        return self._audit(
+            "write.blocked",
+            message="blocked direct write from %s" % (client_ip or "unknown"),
+            client_ip=client_ip or "unknown",
+            method=method,
+            path=path,
+        )
 
     # ---- audit ------------------------------------------------------------
     def _audit(self, event, **fields):

@@ -12,7 +12,9 @@ from __future__ import annotations
 import json
 import os
 import re
+import socket
 import sys
+import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, unquote, urlparse
 
@@ -23,6 +25,33 @@ HOST = os.environ.get("HOST", "0.0.0.0")
 OPENAPI_PATH = os.path.join(HERE, "openapi.json")
 STATIC_DIR = os.path.join(HERE, "static")
 CONFIG_DIR = os.path.join(HERE, "config")
+
+# Writes are only accepted from the Kong data plane, so a caller that reaches the
+# published port directly cannot skip the gateway. Reads stay open: the board
+# needs them and they carry no authority.
+KONG_HOST = os.environ.get("APEX_KONG_HOST", "kong-ai-quickstart-gateway")
+ALLOW_DIRECT_WRITES = os.environ.get("APEX_ALLOW_DIRECT_WRITES", "").strip().lower() in ("1", "true", "yes", "on")
+
+WRITE_REFUSED = {"error": "writes are only accepted through Kong AI Gateway"}
+
+_kong_ip = None
+_kong_ip_lock = threading.Lock()
+
+
+def kong_data_plane_ip(force=False):
+    """Address of the Kong data plane on this docker network.
+
+    Resolved at start-up and re-resolved on a miss, in case the gateway
+    container was recreated with a different address.
+    """
+    global _kong_ip
+    with _kong_ip_lock:
+        if _kong_ip is None or force:
+            try:
+                _kong_ip = socket.gethostbyname(KONG_HOST)
+            except OSError:
+                _kong_ip = None
+        return _kong_ip
 
 CONTENT_TYPES = {
     ".html": "text/html; charset=utf-8",
@@ -60,6 +89,20 @@ class Handler(BaseHTTPRequestHandler):
 
     def _error(self, message, status=400):
         self._send_json({"error": message}, status=status)
+
+    def _client_ip(self):
+        return self.client_address[0] if self.client_address else ""
+
+    def _write_allowed(self):
+        """True only for the Kong data plane (or an explicit test override)."""
+        if ALLOW_DIRECT_WRITES:
+            return True, "explicitly allowed for testing"
+        client = self._client_ip()
+        if client and client == kong_data_plane_ip():
+            return True, "kong"
+        if client and client == kong_data_plane_ip(force=True):
+            return True, "kong"
+        return False, client
 
     def _read_body(self):
         length = int(self.headers.get("Content-Length") or 0)
@@ -174,6 +217,10 @@ class Handler(BaseHTTPRequestHandler):
         parsed = urlparse(self.path)
         path = parsed.path.rstrip("/") or "/"
         try:
+            allowed, detail = self._write_allowed()
+            if not allowed:
+                DISPATCH.blocked_write(detail, self.command, path)
+                return self._send_json(WRITE_REFUSED, status=403)
             body = self._read_body()
 
             if path == "/reroutes":
