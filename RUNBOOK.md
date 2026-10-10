@@ -13,9 +13,18 @@ Everything runs from `~/apextrans-demo/dispatch` unless noted.
 | Rebuild + recreate | `docker build -t apex-dispatch . && docker rm -f apex-dispatch` then the start row above |
 | Health | `curl -s localhost:8090/health` → `{"ok": true}` |
 
-Reset clears every proposal, update and in-memory shipment change, so the demo
-starts from the 8 original exceptions again. Never touch
+Reset is `docker restart apex-dispatch`. It **restarts the service only** - it does
+not run the demo - and it clears every proposal, update and in-memory shipment
+change, so the next run starts from the 8 original exceptions again. Never touch
 `kong-ai-quickstart-gateway` or `ai-pii-service`.
+
+### The supervisor key
+
+There is no supervisor key in the environment or in any file in this repo, and
+the agent ignores `KEY_SUPERVISOR` even if it is set. The key lives only in
+Bryan's locked note and is **pasted at approval time** into the hidden prompt
+(`Dispatcher, paste your supervisor key:`). With no human at the keyboard the
+approval is skipped.
 
 ## Demo, in order
 
@@ -29,20 +38,22 @@ starts from the 8 original exceptions again. Never touch
 
 3. **The story, offline (no gateway needed)**
    `python3 exception_agent.py --direct --yes --reset`
-   → `--reset` restarts the container first so **every run starts from fresh state**
-   (identical to `docker restart apex-dispatch`; set `APEX_CONTAINER` to change the
-   name). Then: 8 exceptions, `AUTO-APPLIED` / `HELD FOR HUMAN` lines with the
-   blocking reasons, any `model pick X rejected (reason) -> using Y` lines, one
-   `APPLIED RR-000x by dispatch-supervisor`, and the `/updates` feed. With the
-   shipped data at 55 mph expect **2 auto-applied, 6 held**. Reset after with
-   `docker restart apex-dispatch`.
+   → `--reset` just restarts the container first (`docker restart apex-dispatch`)
+   so **every run starts from fresh state**; it does not run the demo for you.
+   Then: 8 exceptions, `AUTO-APPLIED` / `HELD FOR HUMAN` lines with the blocking
+   reasons, and any `model pick X rejected (reason) -> using Y` lines. With the
+   shipped data at 55 mph expect **2 auto-applied, 6 held**.
+   Step 6 is human-only: at a keyboard it asks for the supervisor key and applies
+   one held proposal; run non-interactively it prints
+   `approval requires a human - skipped`. `--yes` never approves.
 
 4. **Through the gateway** (once the Kong tools are applied)
    `source ~/.kong/apextrans-squad-keys.env` (you run this, never Bentley)
    `python3 exception_agent.py --model my-gpt-4o`
    → step 1 lists the tools the agent can see (**no `approve_reroute`**); step 5
-   prints Kong's refusal in red (403, or "tool not found"); step 6 uses
-   `KEY_SUPERVISOR` to approve and applies.
+   prints Kong's refusal in red (403, or "tool not found"); step 6 asks you to
+   paste the supervisor key and, only if you do, approves in a separate
+   supervisor session.
 
 5. **Cursor**
    `python3 kong/add_cursor_mcp.py`

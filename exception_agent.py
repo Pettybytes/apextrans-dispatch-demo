@@ -28,6 +28,7 @@ In gateway mode APEX_MCP_URL defaults to $KONNECT_PROXY_URL/apex-dispatch
 from __future__ import annotations
 
 import argparse
+import getpass
 import json
 import os
 import re
@@ -535,13 +536,30 @@ def reset_container(base):
     return False
 
 
+def ask_supervisor_key():
+    """Ask the human operator for the supervisor key, hidden.
+
+    The key is never read from an environment variable or from a file, and is
+    never stored - it exists only for the duration of this call. Returns None
+    when stdin is not an interactive terminal or nothing was entered, which is
+    what makes the approval step skip.
+    """
+    if not sys.stdin.isatty():
+        return None
+    try:
+        return getpass.getpass("    Dispatcher, paste your supervisor key: ").strip()
+    except (EOFError, KeyboardInterrupt):
+        return None
+
+
 # -------------------------------------------------------------------- the flow
 def main():
     global _USE_COLOR
     parser = argparse.ArgumentParser(description="ApexTrans exception agent")
     parser.add_argument("--direct", action="store_true", help="tool calls go to the dispatch service, not the gateway")
     parser.add_argument("--base", default=DEFAULT_DIRECT_BASE, help="direct-mode base URL")
-    parser.add_argument("--yes", action="store_true", help="auto-answer the approval prompt with y")
+    parser.add_argument("--yes", action="store_true",
+                        help="non-interactive convenience flag; it never approves, which needs a human key")
     parser.add_argument("--no-color", action="store_true", help="disable ANSI colour")
     parser.add_argument("--color", action="store_true", help="force ANSI colour")
     parser.add_argument("--limit", type=int, default=0, help="only handle the first N exceptions (0 = all)")
@@ -561,7 +579,8 @@ def main():
         reset_container(args.base)
     proxy_url = os.environ.get("KONNECT_PROXY_URL")
     key_dispatch = os.environ.get("KEY_DISPATCH")
-    key_supervisor = os.environ.get("KEY_SUPERVISOR")
+    # The supervisor key is never taken from the environment: approvals are human-only.
+    supervisor_env_was_set = os.environ.pop("KEY_SUPERVISOR", None) is not None
     gateway = (proxy_url or "http://localhost:8000").rstrip("/")
     mcp_url = os.environ.get("APEX_MCP_URL") or (gateway + "/apex-dispatch")
 
@@ -573,9 +592,11 @@ def main():
         mode = "GATEWAY: MCP -> %s" % mcp_url
 
     print("%sApexTrans exception agent%s  |  %s" % (BOLD, RESET, mode))
-    note("KEY_DISPATCH=%s  KEY_SUPERVISOR=%s  KONNECT_PROXY_URL=%s  APEX_MCP_URL=%s"
-         % (secret_state("KEY_DISPATCH"), secret_state("KEY_SUPERVISOR"),
-            secret_state("KONNECT_PROXY_URL"), secret_state("APEX_MCP_URL")))
+    note("KEY_DISPATCH=%s  KONNECT_PROXY_URL=%s  APEX_MCP_URL=%s"
+         % (secret_state("KEY_DISPATCH"), secret_state("KONNECT_PROXY_URL"),
+            secret_state("APEX_MCP_URL")))
+    if supervisor_env_was_set:
+        note("KEY_SUPERVISOR was set in the environment - ignored (approvals are human-only)")
 
     # 1. which tools can this identity see?
     step(1, "tools/list - what this identity can see")
@@ -681,26 +702,30 @@ def main():
     else:
         note("no held proposals, nothing to try")
 
-    # 6. supervisor approval
-    step(6, "supervisor approval")
-    if held:
+    # 6. supervisor approval - human only; the key is pasted at the prompt
+    step(6, "supervisor approval (human only)")
+    if not held:
+        note("no held proposals to approve")
+    else:
         target = held[0]["proposal_id"]
         shipment = held[0]["shipment_id"]
-        answer = "y" if args.yes else input("    Dispatcher, approve %s? [y/N] " % target).strip().lower()
-        if answer in ("y", "yes"):
+        if args.yes:
+            note("--yes cannot approve: the approval still needs the human key")
+        supervisor_key = ask_supervisor_key()
+        if not supervisor_key:
+            print("    %sapproval requires a human - skipped%s" % (AMBER, RESET))
+        else:
             status, payload, tool_count = tools.approve_as_supervisor(
                 target,
                 approver="dispatch-supervisor",
                 note="Dispatcher approved %s for %s" % (target, shipment),
                 mcp_url=mcp_url,
-                supervisor_key=key_supervisor,
+                supervisor_key=supervisor_key,
             )
             if not tools.mcp:
                 note("direct mode: one local service, so no separate supervisor session here")
             else:
                 note("separate supervisor MCP session; supervisor tool count: %s" % tool_count)
-                if not key_supervisor:
-                    note("%sKEY_SUPERVISOR=MISSING - the supervisor session cannot authenticate%s" % (RED, RESET))
             if status == "not_found":
                 print("    %sapprove_reroute is not in the supervisor's tool list%s" % (RED, RESET))
             elif isinstance(status, int) and status < 400:
@@ -708,10 +733,6 @@ def main():
             else:
                 print("    %sKong refused the approval: %s%s" % (RED, status, RESET))
             print("    Kong result: %s" % json.dumps(payload, separators=(",", ":"))[:400])
-        else:
-            note("not approved - %s stays held" % target)
-    else:
-        note("no held proposals to approve")
 
     # 7. updates feed
     step(7, "applied changes (/updates, newest first)")
