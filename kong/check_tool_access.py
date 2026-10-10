@@ -24,6 +24,7 @@ should not see, or an ACL that lets a squad through exits non-zero.
 from __future__ import annotations
 
 import getpass
+import http.client
 import json
 import os
 import sys
@@ -118,14 +119,18 @@ def open_session(key):
 def print_refusal(identity, key, session, tool, arguments):
     """Ask for a tool this identity must not have, and print Kong's answer.
 
+    Prints the status code and reason phrase only - a refusal body is never
+    echoed, so a Kong error page cannot end up on screen.
+
     Returns True when Kong refused, which is what we want to see.
     """
-    status, body, _ = rpc("tools/call", {"name": tool, "arguments": arguments}, key, session, rid=4)
-    detail = json.dumps(body)[:180] if isinstance(body, (dict, list)) else str(body)[:180]
+    status, _body, _session = rpc("tools/call", {"name": tool, "arguments": arguments},
+                                  key, session, rid=4)
+    verdict = ("%s %s" % (status, http.client.responses.get(status, ""))).strip()
     if status >= 400:
-        print("        Kong refused %s for %s: HTTP %s %s" % (tool, identity, status, detail))
+        print("        Kong refused %s for %s: %s" % (tool, identity, verdict))
         return True
-    print("        *** ACL HOLE: %s was allowed to call %s - %s ***" % (identity, tool, detail))
+    print("        *** ACL HOLE: %s was allowed to call %s (%s) ***" % (identity, tool, verdict))
     return False
 
 
