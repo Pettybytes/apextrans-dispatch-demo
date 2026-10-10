@@ -491,6 +491,57 @@
     $('squadsNote').textContent = s.footer_note || '';
   }
 
+  /* The reset control is local-only: never offered on a deployed copy. */
+  function isLocalHost() {
+    var h = location.hostname;
+    return h === 'localhost' || h === '127.0.0.1' || h === '::1' || h === '[::1]';
+  }
+
+  function toast(text) {
+    var el = $('toast');
+    el.textContent = text;
+    el.hidden = false;
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(function () { el.hidden = true; }, 3200);
+  }
+
+  async function doReset(token) {
+    try {
+      var response = await fetch('/admin/reset', {
+        method: 'POST', headers: { 'X-Admin-Token': token }, cache: 'no-store'
+      });
+      var body = await response.json().catch(function () { return {}; });
+      if (!response.ok) { toast('Reset refused'); return; }
+      sessionStorage.setItem('apexAdminToken', token);
+      toast('Demo reset · ' + (body.loads_open || 0) + ' loads open');
+      await tick();
+    } catch (err) {
+      toast('Reset failed');
+    }
+  }
+
+  function wireReset() {
+    if (!isLocalHost()) return;
+    var button = $('resetDemo');
+    button.hidden = false;
+    button.addEventListener('click', function () {
+      if (!window.confirm('Reset all 12 loads to open?')) return;
+      var saved = sessionStorage.getItem('apexAdminToken');
+      if (saved) { doReset(saved); return; }
+      $('tokenModal').hidden = false;
+      $('tokenInput').focus();
+    });
+    $('tokenCancel').addEventListener('click', function () {
+      $('tokenModal').hidden = true; $('tokenInput').value = '';
+    });
+    $('tokenOk').addEventListener('click', function () {
+      var entered = $('tokenInput').value.trim();
+      $('tokenModal').hidden = true;
+      $('tokenInput').value = '';
+      if (entered) doReset(entered);
+    });
+  }
+
   function render() {
     var rows = buildRows();
     renderKpis(rows);
@@ -504,12 +555,15 @@
     $('liveText').textContent = state.ok ? 'polling every 3s' : 'connection lost - retrying';
     $('liveDot').className = 'live-dot' + (state.ok ? '' : ' stale');
     $('runTime').textContent = 'Run ' + new Date().toISOString().slice(0, 16) + 'Z';
+    var newest = state.audit.length ? state.audit[0].ts_utc : '';
+    $('lastChange').textContent = 'Last change ' + (newest ? hhmm(newest) + 'Z' : '-');
   }
 
   window.addEventListener('DOMContentLoaded', function () {
     jget('/config/squads.json').then(function (s) { state.squads = s; })
       .catch(function (e) { console.error('board: squads.json failed', e); })
       .then(function () { render(); });
+    wireReset();
     tick();
     setInterval(tick, POLL_MS);
   });

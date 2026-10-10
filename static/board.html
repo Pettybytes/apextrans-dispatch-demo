@@ -20,7 +20,9 @@
   <span class="brand-sub">Dispatch Control</span>
   <div class="topbar-right">
     <span class="live"><span class="live-dot" id="liveDot"></span><span id="liveText">polling every 3s</span></span>
+    <span class="num" id="lastChange">Last change -</span>
     <span class="num" id="runTime">-</span>
+    <button class="btn-reset" id="resetDemo" hidden>Reset demo</button>
   </div>
 </header>
 
@@ -99,6 +101,19 @@
 </div>
 
 <footer class="strip">ApexTrans Logistics · demo build · all figures are synthetic · no customer data is used</footer>
+
+<div class="modal" id="tokenModal" hidden>
+  <div class="modal-card">
+    <div class="modal-title">Reset all 12 loads to open?</div>
+    <div class="modal-note">Paste the local admin token. It stays in this tab and is never shown.</div>
+    <input type="password" id="tokenInput" autocomplete="off" spellcheck="false" placeholder="admin token">
+    <div class="modal-actions">
+      <button class="chip" id="tokenCancel">Cancel</button>
+      <button class="chip on" id="tokenOk">Reset</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
 
 <script src="/static/vendor/tabler/tabler.min.js"></script>
 <script src="/static/board.js?v=__ASSET_VERSION__"></script>

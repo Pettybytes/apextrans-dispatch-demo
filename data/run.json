@@ -1,0 +1,1037 @@
+{
+ "drivers": {
+  "DRV-1001": {
+   "name": "Malik Holloway"
+  },
+  "DRV-1002": {
+   "current_terminal": "MEM",
+   "endorsements": "Reefer-certified",
+   "equipment": "Reefer 53ft",
+   "name": "Dana Reyes"
+  },
+  "DRV-1003": {
+   "current_terminal": "DAL",
+   "endorsements": "None",
+   "equipment": "Flatbed 48ft",
+   "name": "Luis Brandt"
+  },
+  "DRV-1004": {
+   "current_terminal": "DEN",
+   "endorsements": "Hazmat",
+   "equipment": "Dry Van 53ft",
+   "name": "Keisha Okafor"
+  },
+  "DRV-1005": {
+   "current_terminal": "ATL",
+   "endorsements": "Reefer-certified",
+   "equipment": "Reefer 53ft",
+   "name": "Tom Sullivan"
+  },
+  "DRV-1006": {
+   "current_terminal": "KCK",
+   "endorsements": "Hazmat",
+   "equipment": "Dry Van 53ft",
+   "name": "Priya Natarajan"
+  },
+  "DRV-1007": {
+   "current_terminal": "STL",
+   "endorsements": "None",
+   "equipment": "Flatbed 48ft",
+   "name": "Andre Fields"
+  },
+  "DRV-1008": {
+   "current_terminal": "NSH",
+   "endorsements": "None",
+   "equipment": "Dry Van 53ft",
+   "name": "Rosa Castillo"
+  },
+  "DRV-1009": {
+   "name": "Jamal Wright"
+  },
+  "DRV-1010": {
+   "current_terminal": "HAR",
+   "endorsements": "Hazmat",
+   "equipment": "Dry Van 53ft",
+   "name": "Erin Lindqvist"
+  },
+  "DRV-1045": {
+   "current_terminal": "STL",
+   "endorsements": "None",
+   "equipment": "Dry Van 53ft",
+   "name": "Marcus Reed"
+  },
+  "DRV-1046": {
+   "current_terminal": "ABQ",
+   "endorsements": "None",
+   "equipment": "Reefer 53ft",
+   "name": "Elena Vasquez"
+  },
+  "DRV-1047": {
+   "current_terminal": "ELP",
+   "endorsements": "Hazmat,TWIC",
+   "equipment": "Flatbed 48ft",
+   "name": "Dwayne Carter"
+  },
+  "DRV-1048": {
+   "current_terminal": "DAL",
+   "endorsements": "TWIC",
+   "equipment": "Flatbed 48ft",
+   "name": "Ingrid Halvorsen"
+  },
+  "DRV-1049": {
+   "current_terminal": "SAT",
+   "endorsements": "Reefer-certified",
+   "equipment": "Dry Van 53ft",
+   "name": "Tobias Grant"
+  },
+  "DRV-1050": {
+   "current_terminal": "HOU",
+   "endorsements": "Reefer-certified,Tanker",
+   "equipment": "Reefer 53ft",
+   "name": "Yusuf Demir"
+  },
+  "DRV-1051": {
+   "current_terminal": "SLC",
+   "endorsements": "TWIC",
+   "equipment": "Reefer 53ft",
+   "name": "Camille Rousseau"
+  },
+  "DRV-1052": {
+   "name": "Hector Salinas"
+  },
+  "DRV-1053": {
+   "current_terminal": "LAX",
+   "endorsements": "Hazmat",
+   "equipment": "Flatbed 48ft",
+   "name": "Nadia Petrova"
+  },
+  "DRV-1054": {
+   "current_terminal": "ATL",
+   "endorsements": "Hazmat,TWIC",
+   "equipment": "Reefer 53ft",
+   "name": "Owen Brady"
+  },
+  "DRV-1055": {
+   "current_terminal": "OAK",
+   "endorsements": "Reefer-certified",
+   "equipment": "Dry Van 53ft",
+   "name": "Fatima Rahman"
+  },
+  "DRV-1056": {
+   "current_terminal": "CHI",
+   "endorsements": "TWIC",
+   "equipment": "Dry Van 53ft",
+   "name": "Lukas Meyer"
+  },
+  "DRV-1057": {
+   "current_terminal": "HOU",
+   "endorsements": "Reefer-certified",
+   "equipment": "Dry Van 53ft",
+   "name": "Rene Duplantis"
+  },
+  "DRV-1058": {
+   "current_terminal": "SAT",
+   "endorsements": "None",
+   "equipment": "Dry Van 53ft",
+   "name": "Sasha Kowalski"
+  },
+  "DRV-1059": {
+   "current_terminal": "NWK",
+   "endorsements": "TWIC",
+   "equipment": "Dry Van 53ft",
+   "name": "Grace Wambui"
+  },
+  "DRV-1060": {
+   "name": "Diego Marchetti"
+  },
+  "DRV-1061": {
+   "current_terminal": "DEN",
+   "endorsements": "Reefer-certified",
+   "equipment": "Dry Van 53ft",
+   "name": "Aisha Bello"
+  },
+  "DRV-1062": {
+   "current_terminal": "DAL",
+   "endorsements": "TWIC",
+   "equipment": "Reefer 53ft",
+   "name": "Karl Lindgren"
+  },
+  "DRV-1063": {
+   "current_terminal": "PDX",
+   "endorsements": "Reefer-certified,Tanker",
+   "equipment": "Flatbed 48ft",
+   "name": "Priscilla Okafor"
+  },
+  "DRV-1064": {
+   "current_terminal": "DET",
+   "endorsements": "Tanker",
+   "equipment": "Reefer 53ft",
+   "name": "Viktor Novak"
+  }
+ },
+ "events": [
+  {
+   "event": "read.lookup",
+   "identity": "direct (unverified)",
+   "message": "direct (unverified) looked up the audit log",
+   "subject": "the audit log",
+   "ts_utc": "2026-10-10T21:24Z"
+  },
+  {
+   "event": "read.lookup",
+   "identity": "direct (unverified)",
+   "message": "direct (unverified) looked up APX-2610149",
+   "subject": "APX-2610149",
+   "ts_utc": "2026-10-10T21:24Z"
+  },
+  {
+   "event": "read.lookup",
+   "identity": "direct (unverified)",
+   "message": "direct (unverified) looked up APX-2610149",
+   "subject": "APX-2610149",
+   "ts_utc": "2026-10-10T21:24Z"
+  },
+  {
+   "event": "read.lookup",
+   "identity": "direct (unverified)",
+   "message": "direct (unverified) looked up APX-2610149",
+   "subject": "APX-2610149",
+   "ts_utc": "2026-10-10T21:24Z"
+  },
+  {
+   "actor": "dispatch-supervisor",
+   "event": "shipment.rerouted",
+   "new_driver_id": "DRV-1052",
+   "new_eta_utc": "2026-10-15T02:06Z",
+   "note": "approved for this run",
+   "proposal_id": "RR-0004",
+   "shipment_id": "APX-2610215",
+   "ts_utc": "2026-10-10T21:24Z"
+  },
+  {
+   "approver": "dispatch-supervisor",
+   "event": "proposal.approved",
+   "note": "approved for this run",
+   "proposal_id": "RR-0004",
+   "shipment_id": "APX-2610215",
+   "ts_utc": "2026-10-10T21:24Z"
+  },
+  {
+   "actor": "exception-agent",
+   "conflicts": [
+    "Drive limit: needs 30.7 h, driver has 9.5 h left today (11-hour rule)",
+    "On-duty window: 14-hour window closes in 10.5 h",
+    "new ETA 2026-10-16T05:21Z still misses delivery due 2026-10-15T06:44Z",
+    "cost $2425 over $500 limit"
+   ],
+   "decision": "pending_human",
+   "event": "proposal.created",
+   "new_driver_id": "DRV-1003",
+   "proposal_id": "RR-0012",
+   "reason": "fallback: 1461 mi deadhead",
+   "shipment_id": "APX-2610179",
+   "ts_utc": "2026-10-10T21:24Z"
+  },
+  {
+   "actor": "exception-agent",
+   "conflicts": [
+    "Drive limit: needs 52.4 h, driver has 8.0 h left today (11-hour rule)",
+    "On-duty window: 14-hour window closes in 9.0 h",
+    "Weekly cycle: 26 of 70 hours used",
+    "new ETA 2026-10-17T00:40Z still misses delivery due 2026-10-15T14:50Z",
+    "cost $4085 over $500 limit"
+   ],
+   "decision": "pending_human",
+   "event": "proposal.created",
+   "new_driver_id": "DRV-1005",
+   "proposal_id": "RR-0011",
+   "reason": "fallback: 2553 mi deadhead",
+   "shipment_id": "APX-2610152",
+   "ts_utc": "2026-10-10T21:24Z"
+  },
+  {
+   "actor": "exception-agent",
+   "conflicts": [
+    "Drive limit: needs 10.1 h, driver has 7.0 h left today (11-hour rule)",
+    "On-duty window: 14-hour window closes in 8.0 h",
+    "new ETA 2026-10-15T07:09Z still misses delivery due 2026-10-15T07:07Z",
+    "cost $676 over $500 limit"
+   ],
+   "decision": "pending_human",
+   "event": "proposal.created",
+   "new_driver_id": "DRV-1008",
+   "proposal_id": "RR-0010",
+   "reason": "fallback: 407 mi deadhead",
+   "shipment_id": "APX-2610149",
+   "ts_utc": "2026-10-10T21:24Z"
+  },
+  {
+   "actor": "exception-agent",
+   "conflicts": [
+    "Drive limit: needs 10.8 h, driver has 2.0 h left today (11-hour rule)",
+    "On-duty window: 14-hour window closes in 3.0 h",
+    "Truck out of service: brake air leak",
+    "Open defect on truck TRK-1004: brake air leak. Must be repaired before dispatch",
+    "new ETA 2026-10-15T10:58Z still misses delivery due 2026-10-15T08:57Z",
+    "cost $675 over $500 limit"
+   ],
+   "decision": "pending_human",
+   "event": "proposal.created",
+   "new_driver_id": "DRV-1004",
+   "proposal_id": "RR-0009",
+   "reason": "fallback: 402 mi deadhead",
+   "shipment_id": "APX-2610141",
+   "ts_utc": "2026-10-10T21:24Z"
+  },
+  {
+   "actor": "exception-agent",
+   "conflicts": [
+    "Drive limit: needs 31.2 h, driver has 5.0 h left today (11-hour rule)",
+    "On-duty window: 14-hour window closes in 6.0 h",
+    "Weekly cycle: 41 of 70 hours used",
+    "Truck out of service: reefer unit fault",
+    "Reefer unit fault on truck TRK-1002: reefer unit fault. Trailer cannot hold temperature for this load",
+    "new ETA 2026-10-16T01:09Z still misses delivery due 2026-10-15T04:45Z",
+    "cost $1837 over $500 limit"
+   ],
+   "decision": "pending_human",
+   "event": "proposal.created",
+   "new_driver_id": "DRV-1002",
+   "proposal_id": "RR-0008",
+   "reason": "fallback: 1170 mi deadhead",
+   "shipment_id": "APX-2610211",
+   "ts_utc": "2026-10-10T21:24Z"
+  },
+  {
+   "actor": "exception-agent",
+   "conflicts": [
+    "Drive limit: needs 12.2 h, driver has 6.6 h left today (11-hour rule)",
+    "On-duty window: 14-hour window closes in 8.9 h",
+    "new ETA 2026-10-15T06:13Z still misses delivery due 2026-10-15T02:36Z",
+    "cost $610 over $500 limit"
+   ],
+   "decision": "pending_human",
+   "event": "proposal.created",
+   "new_driver_id": "DRV-1050",
+   "proposal_id": "RR-0007",
+   "reason": "fallback: 381 mi deadhead",
+   "shipment_id": "APX-2610207",
+   "ts_utc": "2026-10-10T21:24Z"
+  },
+  {
+   "actor": "exception-agent",
+   "conflicts": [
+    "Drive limit: needs 11.5 h, driver has 3.5 h left today (11-hour rule)",
+    "On-duty window: 14-hour window closes in 5.0 h",
+    "Truck out of service: tire tread below limit",
+    "Open defect on truck TRK-1007: tire tread below limit. Must be repaired before dispatch"
+   ],
+   "decision": "pending_human",
+   "event": "proposal.created",
+   "new_driver_id": "DRV-1007",
+   "proposal_id": "RR-0006",
+   "reason": "fallback: 289 mi deadhead",
+   "shipment_id": "APX-2610145",
+   "ts_utc": "2026-10-10T21:24Z"
+  },
+  {
+   "actor": "exception-agent",
+   "conflicts": [
+    "Drive limit: needs 7.6 h, driver has 2.5 h left today (11-hour rule)",
+    "On-duty window: 14-hour window closes in 3.5 h",
+    "Weekly cycle: 63 of 70 hours used",
+    "Truck out of service: lights inoperative",
+    "Open defect on truck TRK-1006: lights inoperative. Must be repaired before dispatch",
+    "new ETA 2026-10-15T01:37Z still misses delivery due 2026-10-14T18:52Z"
+   ],
+   "decision": "pending_human",
+   "event": "proposal.created",
+   "new_driver_id": "DRV-1006",
+   "proposal_id": "RR-0005",
+   "reason": "fallback: 261 mi deadhead",
+   "shipment_id": "APX-2610203",
+   "ts_utc": "2026-10-10T21:24Z"
+  },
+  {
+   "actor": "exception-agent",
+   "conflicts": [
+    "Drive limit: needs 8.1 h, driver has 4.6 h left today (11-hour rule)",
+    "On-duty window: 14-hour window closes in 7.0 h",
+    "Weekly cycle: 67 of 70 hours used",
+    "new ETA 2026-10-15T02:06Z still misses delivery due 2026-10-14T19:06Z"
+   ],
+   "decision": "pending_human",
+   "event": "proposal.created",
+   "new_driver_id": "DRV-1052",
+   "proposal_id": "RR-0004",
+   "reason": "fallback: 227 mi deadhead",
+   "shipment_id": "APX-2610215",
+   "ts_utc": "2026-10-10T21:24Z"
+  },
+  {
+   "actor": "exception-agent",
+   "event": "shipment.rerouted",
+   "new_driver_id": "DRV-1001",
+   "new_eta_utc": "2026-10-14T11:05Z",
+   "note": "auto-applied (no conflicts, within limit)",
+   "proposal_id": "RR-0003",
+   "shipment_id": "APX-2610177",
+   "ts_utc": "2026-10-10T21:24Z"
+  },
+  {
+   "actor": "exception-agent",
+   "conflicts": [],
+   "decision": "auto_applied",
+   "event": "proposal.created",
+   "new_driver_id": "DRV-1001",
+   "proposal_id": "RR-0003",
+   "reason": "fallback: 198 mi deadhead",
+   "shipment_id": "APX-2610177",
+   "ts_utc": "2026-10-10T21:24Z"
+  },
+  {
+   "actor": "exception-agent",
+   "event": "shipment.rerouted",
+   "new_driver_id": "DRV-1009",
+   "new_eta_utc": "2026-10-14T10:20Z",
+   "note": "auto-applied (no conflicts, within limit)",
+   "proposal_id": "RR-0002",
+   "shipment_id": "APX-2610161",
+   "ts_utc": "2026-10-10T21:24Z"
+  },
+  {
+   "actor": "exception-agent",
+   "conflicts": [],
+   "decision": "auto_applied",
+   "event": "proposal.created",
+   "new_driver_id": "DRV-1009",
+   "proposal_id": "RR-0002",
+   "reason": "fallback: 0 mi deadhead",
+   "shipment_id": "APX-2610161",
+   "ts_utc": "2026-10-10T21:24Z"
+  },
+  {
+   "actor": "exception-agent",
+   "event": "shipment.rerouted",
+   "new_driver_id": "DRV-1060",
+   "new_eta_utc": "2026-10-14T17:27Z",
+   "note": "auto-applied (no conflicts, within limit)",
+   "proposal_id": "RR-0001",
+   "shipment_id": "APX-2610140",
+   "ts_utc": "2026-10-10T21:24Z"
+  },
+  {
+   "actor": "exception-agent",
+   "conflicts": [],
+   "decision": "auto_applied",
+   "event": "proposal.created",
+   "new_driver_id": "DRV-1060",
+   "proposal_id": "RR-0001",
+   "reason": "fallback: 0 mi deadhead",
+   "shipment_id": "APX-2610140",
+   "ts_utc": "2026-10-10T21:24Z"
+  }
+ ],
+ "exceptions": [
+  {
+   "current_location": "En route, ~292 mi from Salt Lake City, UT",
+   "customer": "Sunbelt Beverages",
+   "delivery_due_utc": "2026-10-15T09:05Z",
+   "dest_terminal": "SLC",
+   "driver_id": "DRV-1044",
+   "equipment": "Dry Van 53ft",
+   "est_margin_usd": "481.32",
+   "eta_utc": "2026-10-15T14:05Z",
+   "exception_note": "Severe storm on planned route; chain law / closure in effect",
+   "exception_type": "Weather",
+   "hazmat": "N",
+   "lane": "Albuquerque, NM -> Salt Lake City, UT",
+   "late_vs_due_hours": 5.0,
+   "load_type": "Dry Van",
+   "miles": "573",
+   "nearest_terminal": "ABQ",
+   "on_time": false,
+   "origin_terminal": "ABQ",
+   "percent_complete": "49",
+   "priority": "Expedited",
+   "remaining_miles": 292.2,
+   "shipment_id": "APX-2610140"
+  },
+  {
+   "current_location": "En route, ~190 mi from Albuquerque, NM",
+   "customer": "Keystone Chemicals",
+   "delivery_due_utc": "2026-10-15T08:57Z",
+   "dest_terminal": "ABQ",
+   "driver_id": "DRV-1043",
+   "equipment": "Dry Van 53ft",
+   "est_margin_usd": "762.35",
+   "eta_utc": "2026-10-15T17:57Z",
+   "exception_note": "Tractor fault code, unit towed to repair shop",
+   "exception_type": "Equipment breakdown",
+   "hazmat": "Y",
+   "lane": "Denver, CO -> Albuquerque, NM",
+   "late_vs_due_hours": 9.0,
+   "load_type": "Hazmat",
+   "miles": "395",
+   "nearest_terminal": "ABQ",
+   "on_time": false,
+   "origin_terminal": "DEN",
+   "percent_complete": "52",
+   "priority": "Expedited",
+   "remaining_miles": 189.6,
+   "shipment_id": "APX-2610141"
+  },
+  {
+   "current_location": "En route, ~343 mi from Dallas, TX",
+   "customer": "Great Lakes Steel",
+   "delivery_due_utc": "2026-10-15T14:08Z",
+   "dest_terminal": "DAL",
+   "driver_id": "DRV-1041",
+   "equipment": "Flatbed 48ft",
+   "est_margin_usd": "745.04",
+   "eta_utc": "2026-10-16T01:08Z",
+   "exception_note": "Driver out of drive hours before delivery",
+   "exception_type": "HOS limit",
+   "hazmat": "N",
+   "lane": "Kansas City, KS -> Dallas, TX",
+   "late_vs_due_hours": 11.0,
+   "load_type": "Flatbed",
+   "miles": "536",
+   "nearest_terminal": "KCK",
+   "on_time": false,
+   "origin_terminal": "KCK",
+   "percent_complete": "36",
+   "priority": "Expedited",
+   "remaining_miles": 343.0,
+   "shipment_id": "APX-2610145"
+  },
+  {
+   "current_location": "En route, ~150 mi from Charlotte, NC",
+   "customer": "Summit Electronics",
+   "delivery_due_utc": "2026-10-15T07:07Z",
+   "dest_terminal": "CLT",
+   "driver_id": "DRV-1039",
+   "equipment": "Dry Van 53ft",
+   "est_margin_usd": "285.56",
+   "eta_utc": "2026-10-15T11:07Z",
+   "exception_note": "Interstate closure on planned route, ~3-hr detour",
+   "exception_type": "Road closure",
+   "hazmat": "N",
+   "lane": "Harrisburg, PA -> Charlotte, NC",
+   "late_vs_due_hours": 4.0,
+   "load_type": "Dry Van",
+   "miles": "484",
+   "nearest_terminal": "CLT",
+   "on_time": false,
+   "origin_terminal": "HAR",
+   "percent_complete": "69",
+   "priority": "Expedited",
+   "remaining_miles": 150.0,
+   "shipment_id": "APX-2610149"
+  },
+  {
+   "current_location": "En route, ~328 mi from Oakland, CA",
+   "customer": "Sunbelt Beverages",
+   "delivery_due_utc": "2026-10-15T14:50Z",
+   "dest_terminal": "OAK",
+   "driver_id": "DRV-1036",
+   "equipment": "Reefer 53ft",
+   "est_margin_usd": "977.2",
+   "eta_utc": "2026-10-15T17:50Z",
+   "exception_note": "Trailer reading 44\u00b0F vs 36\u00b0F setpoint",
+   "exception_type": "Reefer temp alarm",
+   "hazmat": "N",
+   "lane": "Salt Lake City, UT -> Oakland, CA",
+   "late_vs_due_hours": 3.0,
+   "load_type": "Reefer",
+   "miles": "698",
+   "nearest_terminal": "OAK",
+   "on_time": false,
+   "origin_terminal": "SLC",
+   "percent_complete": "53",
+   "priority": "Standard",
+   "remaining_miles": 328.1,
+   "shipment_id": "APX-2610152"
+  },
+  {
+   "current_location": "En route, ~173 mi from Phoenix, AZ",
+   "customer": "Brightline Pharma",
+   "delivery_due_utc": "2026-10-15T07:35Z",
+   "dest_terminal": "PHX",
+   "driver_id": "DRV-1027",
+   "equipment": "Reefer 53ft",
+   "est_margin_usd": "953.58",
+   "eta_utc": "2026-10-15T15:35Z",
+   "exception_note": "Driver reported sick; load parked at truck stop",
+   "exception_type": "Driver illness",
+   "hazmat": "N",
+   "lane": "Denver, CO -> Phoenix, AZ",
+   "late_vs_due_hours": 8.0,
+   "load_type": "Reefer",
+   "miles": "691",
+   "nearest_terminal": "PHX",
+   "on_time": false,
+   "origin_terminal": "DEN",
+   "percent_complete": "75",
+   "priority": "Expedited",
+   "remaining_miles": 172.8,
+   "shipment_id": "APX-2610161"
+  },
+  {
+   "current_location": "En route, ~275 mi from Chicago, IL",
+   "customer": "Summit Electronics",
+   "delivery_due_utc": "2026-10-15T08:44Z",
+   "dest_terminal": "CHI",
+   "driver_id": "DRV-1014",
+   "equipment": "Dry Van 53ft",
+   "est_margin_usd": "1438.2",
+   "eta_utc": "2026-10-15T20:44Z",
+   "exception_note": "Receiver dock closed; next slot tomorrow 06:00 local",
+   "exception_type": "Missed appointment",
+   "hazmat": "N",
+   "lane": "Jacksonville, FL -> Chicago, IL",
+   "late_vs_due_hours": 12.0,
+   "load_type": "Dry Van",
+   "miles": "1020",
+   "nearest_terminal": "IND",
+   "on_time": false,
+   "origin_terminal": "JAX",
+   "percent_complete": "73",
+   "priority": "Standard",
+   "remaining_miles": 275.4,
+   "shipment_id": "APX-2610177"
+  },
+  {
+   "current_location": "En route, ~227 mi from Harrisburg, PA",
+   "customer": "Great Lakes Steel",
+   "delivery_due_utc": "2026-10-15T06:44Z",
+   "dest_terminal": "HAR",
+   "driver_id": "DRV-1012",
+   "equipment": "Flatbed 48ft",
+   "est_margin_usd": "324.28",
+   "eta_utc": "2026-10-15T13:44Z",
+   "exception_note": "DOT roadside inspection, ~2-hr hold",
+   "exception_type": "Inspection hold",
+   "hazmat": "N",
+   "lane": "Charlotte, NC -> Harrisburg, PA",
+   "late_vs_due_hours": 7.0,
+   "load_type": "Flatbed",
+   "miles": "484",
+   "nearest_terminal": "HAR",
+   "on_time": false,
+   "origin_terminal": "CLT",
+   "percent_complete": "53",
+   "priority": "Expedited",
+   "remaining_miles": 227.5,
+   "shipment_id": "APX-2610179"
+  },
+  {
+   "current_location": "En route, ~158 mi from Tulsa, OK",
+   "customer": "Waypoint Retail",
+   "delivery_due_utc": "2026-10-14T18:52Z",
+   "dest_terminal": "TUL",
+   "driver_id": "DRV-1090",
+   "equipment": "Dry Van 53ft",
+   "est_margin_usd": "1370.37",
+   "eta_utc": "2026-10-17T08:52Z",
+   "exception_note": "Assigned tractor failed pre-trip; replacement needed",
+   "exception_type": "Truck breakdown",
+   "hazmat": "N",
+   "lane": "San Antonio, TX -> Tulsa, OK",
+   "late_vs_due_hours": 62.0,
+   "load_type": "Dry Van",
+   "miles": "268",
+   "nearest_terminal": "TUL",
+   "on_time": false,
+   "origin_terminal": "SAT",
+   "percent_complete": "41",
+   "priority": "Expedited",
+   "remaining_miles": 158.1,
+   "shipment_id": "APX-2610203"
+  },
+  {
+   "current_location": "En route, ~291 mi from New Orleans, LA",
+   "customer": "Bluegrass Mills",
+   "delivery_due_utc": "2026-10-15T02:36Z",
+   "dest_terminal": "MSY",
+   "driver_id": "DRV-1091",
+   "equipment": "Reefer 53ft",
+   "est_margin_usd": "2224.03",
+   "eta_utc": "2026-10-18T01:36Z",
+   "exception_note": "Driver has run out of legal driving hours",
+   "exception_type": "Driver out of hours",
+   "hazmat": "N",
+   "lane": "Portland, OR -> New Orleans, LA",
+   "late_vs_due_hours": 71.0,
+   "load_type": "Reefer",
+   "miles": "693",
+   "nearest_terminal": "MSY",
+   "on_time": false,
+   "origin_terminal": "PDX",
+   "percent_complete": "58",
+   "priority": "Expedited",
+   "remaining_miles": 291.1,
+   "shipment_id": "APX-2610207"
+  },
+  {
+   "current_location": "En route, ~544 mi from El Paso, TX",
+   "customer": "Keystone Chemicals",
+   "delivery_due_utc": "2026-10-15T04:45Z",
+   "dest_terminal": "ELP",
+   "driver_id": "DRV-1092",
+   "equipment": "Reefer 53ft",
+   "est_margin_usd": "2166.4",
+   "eta_utc": "2026-10-17T11:45Z",
+   "exception_note": "Reefer unit fault code; load cannot move on this trailer",
+   "exception_type": "Reefer unit fault",
+   "hazmat": "N",
+   "lane": "Buffalo, NY -> El Paso, TX",
+   "late_vs_due_hours": 55.0,
+   "load_type": "Reefer",
+   "miles": "812",
+   "nearest_terminal": "ELP",
+   "on_time": false,
+   "origin_terminal": "BUF",
+   "percent_complete": "33",
+   "priority": "Standard",
+   "remaining_miles": 544.0,
+   "shipment_id": "APX-2610211"
+  },
+  {
+   "current_location": "En route, ~219 mi from San Antonio, TX",
+   "customer": "Cascade Paper",
+   "delivery_due_utc": "2026-10-14T19:06Z",
+   "dest_terminal": "SAT",
+   "driver_id": "DRV-1093",
+   "equipment": "Flatbed 48ft",
+   "est_margin_usd": "1125.06",
+   "eta_utc": "2026-10-16T11:06Z",
+   "exception_note": "Shipper not ready at pickup; appointment slipped",
+   "exception_type": "Late pickup",
+   "hazmat": "N",
+   "lane": "Tulsa, OK -> San Antonio, TX",
+   "late_vs_due_hours": 40.0,
+   "load_type": "Flatbed",
+   "miles": "281",
+   "nearest_terminal": "SAT",
+   "on_time": false,
+   "origin_terminal": "TUL",
+   "percent_complete": "22",
+   "priority": "Expedited",
+   "remaining_miles": 219.2,
+   "shipment_id": "APX-2610215"
+  }
+ ],
+ "generated_utc": "2026-10-10T21:24Z",
+ "proposals": [
+  {
+   "conflicts": [
+    "Drive limit: needs 30.7 h, driver has 9.5 h left today (11-hour rule)",
+    "On-duty window: 14-hour window closes in 10.5 h",
+    "new ETA 2026-10-16T05:21Z still misses delivery due 2026-10-15T06:44Z",
+    "cost $2425 over $500 limit"
+   ],
+   "created_utc": "2026-10-10T21:24Z",
+   "deadhead_miles": 1461,
+   "decision": "pending_human",
+   "new_driver_id": "DRV-1003",
+   "new_eta_utc": "2026-10-16T05:21Z",
+   "notes": [
+    "needs an overnight reset",
+    "Minor defect on truck TRK-1003: cracked mirror (does not block dispatch)"
+   ],
+   "proposal_id": "RR-0012",
+   "reason": "fallback: 1461 mi deadhead",
+   "requested_by": "exception-agent",
+   "reroute_cost_usd": 2425.26,
+   "shipment_id": "APX-2610179",
+   "status": "pending"
+  },
+  {
+   "conflicts": [
+    "Drive limit: needs 52.4 h, driver has 8.0 h left today (11-hour rule)",
+    "On-duty window: 14-hour window closes in 9.0 h",
+    "Weekly cycle: 26 of 70 hours used",
+    "new ETA 2026-10-17T00:40Z still misses delivery due 2026-10-15T14:50Z",
+    "cost $4085 over $500 limit"
+   ],
+   "created_utc": "2026-10-10T21:24Z",
+   "deadhead_miles": 2553,
+   "decision": "pending_human",
+   "new_driver_id": "DRV-1005",
+   "new_eta_utc": "2026-10-17T00:40Z",
+   "notes": [
+    "needs an overnight reset"
+   ],
+   "proposal_id": "RR-0011",
+   "reason": "fallback: 2553 mi deadhead",
+   "requested_by": "exception-agent",
+   "reroute_cost_usd": 4084.8,
+   "shipment_id": "APX-2610152",
+   "status": "pending"
+  },
+  {
+   "conflicts": [
+    "Drive limit: needs 10.1 h, driver has 7.0 h left today (11-hour rule)",
+    "On-duty window: 14-hour window closes in 8.0 h",
+    "new ETA 2026-10-15T07:09Z still misses delivery due 2026-10-15T07:07Z",
+    "cost $676 over $500 limit"
+   ],
+   "created_utc": "2026-10-10T21:24Z",
+   "deadhead_miles": 407,
+   "decision": "pending_human",
+   "new_driver_id": "DRV-1008",
+   "new_eta_utc": "2026-10-15T07:09Z",
+   "notes": [
+    "needs an overnight reset"
+   ],
+   "proposal_id": "RR-0010",
+   "reason": "fallback: 407 mi deadhead",
+   "requested_by": "exception-agent",
+   "reroute_cost_usd": 675.62,
+   "shipment_id": "APX-2610149",
+   "status": "pending"
+  },
+  {
+   "conflicts": [
+    "Drive limit: needs 10.8 h, driver has 2.0 h left today (11-hour rule)",
+    "On-duty window: 14-hour window closes in 3.0 h",
+    "Truck out of service: brake air leak",
+    "Open defect on truck TRK-1004: brake air leak. Must be repaired before dispatch",
+    "new ETA 2026-10-15T10:58Z still misses delivery due 2026-10-15T08:57Z",
+    "cost $675 over $500 limit"
+   ],
+   "created_utc": "2026-10-10T21:24Z",
+   "deadhead_miles": 402,
+   "decision": "pending_human",
+   "new_driver_id": "DRV-1004",
+   "new_eta_utc": "2026-10-15T10:58Z",
+   "notes": [
+    "Break due: 30-minute break needed before driving (9 h since last break)",
+    "needs an overnight reset"
+   ],
+   "proposal_id": "RR-0009",
+   "reason": "fallback: 402 mi deadhead",
+   "requested_by": "exception-agent",
+   "reroute_cost_usd": 675.36,
+   "shipment_id": "APX-2610141",
+   "status": "pending"
+  },
+  {
+   "conflicts": [
+    "Drive limit: needs 31.2 h, driver has 5.0 h left today (11-hour rule)",
+    "On-duty window: 14-hour window closes in 6.0 h",
+    "Weekly cycle: 41 of 70 hours used",
+    "Truck out of service: reefer unit fault",
+    "Reefer unit fault on truck TRK-1002: reefer unit fault. Trailer cannot hold temperature for this load",
+    "new ETA 2026-10-16T01:09Z still misses delivery due 2026-10-15T04:45Z",
+    "cost $1837 over $500 limit"
+   ],
+   "created_utc": "2026-10-10T21:24Z",
+   "deadhead_miles": 1170,
+   "decision": "pending_human",
+   "new_driver_id": "DRV-1002",
+   "new_eta_utc": "2026-10-16T01:09Z",
+   "notes": [
+    "needs an overnight reset"
+   ],
+   "proposal_id": "RR-0008",
+   "reason": "fallback: 1170 mi deadhead",
+   "requested_by": "exception-agent",
+   "reroute_cost_usd": 1836.9,
+   "shipment_id": "APX-2610211",
+   "status": "pending"
+  },
+  {
+   "conflicts": [
+    "Drive limit: needs 12.2 h, driver has 6.6 h left today (11-hour rule)",
+    "On-duty window: 14-hour window closes in 8.9 h",
+    "new ETA 2026-10-15T06:13Z still misses delivery due 2026-10-15T02:36Z",
+    "cost $610 over $500 limit"
+   ],
+   "created_utc": "2026-10-10T21:24Z",
+   "deadhead_miles": 381,
+   "decision": "pending_human",
+   "new_driver_id": "DRV-1050",
+   "new_eta_utc": "2026-10-15T06:13Z",
+   "notes": [
+    "needs an overnight reset",
+    "Minor defect on truck TRK-1050: low coolant warning (does not block dispatch)"
+   ],
+   "proposal_id": "RR-0007",
+   "reason": "fallback: 381 mi deadhead",
+   "requested_by": "exception-agent",
+   "reroute_cost_usd": 609.6,
+   "shipment_id": "APX-2610207",
+   "status": "pending"
+  },
+  {
+   "conflicts": [
+    "Drive limit: needs 11.5 h, driver has 3.5 h left today (11-hour rule)",
+    "On-duty window: 14-hour window closes in 5.0 h",
+    "Truck out of service: tire tread below limit",
+    "Open defect on truck TRK-1007: tire tread below limit. Must be repaired before dispatch"
+   ],
+   "created_utc": "2026-10-10T21:24Z",
+   "deadhead_miles": 289,
+   "decision": "pending_human",
+   "new_driver_id": "DRV-1007",
+   "new_eta_utc": "2026-10-15T11:57Z",
+   "notes": [
+    "Break due: 30-minute break needed before driving (8 h since last break)",
+    "needs an overnight reset"
+   ],
+   "proposal_id": "RR-0006",
+   "reason": "fallback: 289 mi deadhead",
+   "requested_by": "exception-agent",
+   "reroute_cost_usd": 471.07,
+   "shipment_id": "APX-2610145",
+   "status": "pending"
+  },
+  {
+   "conflicts": [
+    "Drive limit: needs 7.6 h, driver has 2.5 h left today (11-hour rule)",
+    "On-duty window: 14-hour window closes in 3.5 h",
+    "Weekly cycle: 63 of 70 hours used",
+    "Truck out of service: lights inoperative",
+    "Open defect on truck TRK-1006: lights inoperative. Must be repaired before dispatch",
+    "new ETA 2026-10-15T01:37Z still misses delivery due 2026-10-14T18:52Z"
+   ],
+   "created_utc": "2026-10-10T21:24Z",
+   "deadhead_miles": 261,
+   "decision": "pending_human",
+   "new_driver_id": "DRV-1006",
+   "new_eta_utc": "2026-10-15T01:37Z",
+   "notes": [
+    "needs an overnight reset"
+   ],
+   "proposal_id": "RR-0005",
+   "reason": "fallback: 261 mi deadhead",
+   "requested_by": "exception-agent",
+   "reroute_cost_usd": 448.92,
+   "shipment_id": "APX-2610203",
+   "status": "pending"
+  },
+  {
+   "applied_by": "dispatch-supervisor",
+   "applied_utc": "2026-10-10T21:24Z",
+   "conflicts": [
+    "Drive limit: needs 8.1 h, driver has 4.6 h left today (11-hour rule)",
+    "On-duty window: 14-hour window closes in 7.0 h",
+    "Weekly cycle: 67 of 70 hours used",
+    "new ETA 2026-10-15T02:06Z still misses delivery due 2026-10-14T19:06Z"
+   ],
+   "created_utc": "2026-10-10T21:24Z",
+   "deadhead_miles": 227,
+   "decision": "pending_human",
+   "new_driver_id": "DRV-1052",
+   "new_eta_utc": "2026-10-15T02:06Z",
+   "notes": [
+    "needs an overnight reset"
+   ],
+   "proposal_id": "RR-0004",
+   "reason": "fallback: 227 mi deadhead",
+   "requested_by": "exception-agent",
+   "reroute_cost_usd": 383.63,
+   "shipment_id": "APX-2610215",
+   "status": "applied"
+  },
+  {
+   "applied_by": "exception-agent",
+   "applied_utc": "2026-10-10T21:24Z",
+   "conflicts": [],
+   "created_utc": "2026-10-10T21:24Z",
+   "deadhead_miles": 198,
+   "decision": "auto_applied",
+   "new_driver_id": "DRV-1001",
+   "new_eta_utc": "2026-10-14T11:05Z",
+   "notes": [],
+   "proposal_id": "RR-0003",
+   "reason": "fallback: 198 mi deadhead",
+   "requested_by": "exception-agent",
+   "reroute_cost_usd": 316.8,
+   "shipment_id": "APX-2610177",
+   "status": "applied"
+  },
+  {
+   "applied_by": "exception-agent",
+   "applied_utc": "2026-10-10T21:24Z",
+   "conflicts": [],
+   "created_utc": "2026-10-10T21:24Z",
+   "deadhead_miles": 0,
+   "decision": "auto_applied",
+   "new_driver_id": "DRV-1009",
+   "new_eta_utc": "2026-10-14T10:20Z",
+   "notes": [],
+   "proposal_id": "RR-0002",
+   "reason": "fallback: 0 mi deadhead",
+   "requested_by": "exception-agent",
+   "reroute_cost_usd": 0.0,
+   "shipment_id": "APX-2610161",
+   "status": "applied"
+  },
+  {
+   "applied_by": "exception-agent",
+   "applied_utc": "2026-10-10T21:24Z",
+   "conflicts": [],
+   "created_utc": "2026-10-10T21:24Z",
+   "deadhead_miles": 0,
+   "decision": "auto_applied",
+   "new_driver_id": "DRV-1060",
+   "new_eta_utc": "2026-10-14T17:27Z",
+   "notes": [],
+   "proposal_id": "RR-0001",
+   "reason": "fallback: 0 mi deadhead",
+   "requested_by": "exception-agent",
+   "reroute_cost_usd": 0.0,
+   "shipment_id": "APX-2610140",
+   "status": "applied"
+  }
+ ],
+ "source": "Recorded lab run - synthetic ApexTrans dispatches",
+ "start": {
+  "loads_open": 12
+ },
+ "updates": [
+  {
+   "actor": "dispatch-supervisor",
+   "driver_id": "DRV-1052",
+   "driver_name": "Hector Salinas",
+   "message": "APX-2610215 reassigned to Hector Salinas (DRV-1052). New ETA 02:06 UTC. Customer notified.",
+   "new_eta_utc": "2026-10-15T02:06Z",
+   "proposal_id": "RR-0004",
+   "shipment_id": "APX-2610215",
+   "ts_utc": "2026-10-10T21:24Z"
+  },
+  {
+   "actor": "exception-agent",
+   "driver_id": "DRV-1001",
+   "driver_name": "Malik Holloway",
+   "message": "APX-2610177 reassigned to Malik Holloway (DRV-1001). New ETA 11:05 UTC. Customer notified.",
+   "new_eta_utc": "2026-10-14T11:05Z",
+   "proposal_id": "RR-0003",
+   "shipment_id": "APX-2610177",
+   "ts_utc": "2026-10-10T21:24Z"
+  },
+  {
+   "actor": "exception-agent",
+   "driver_id": "DRV-1009",
+   "driver_name": "Jamal Wright",
+   "message": "APX-2610161 reassigned to Jamal Wright (DRV-1009). New ETA 10:20 UTC. Customer notified.",
+   "new_eta_utc": "2026-10-14T10:20Z",
+   "proposal_id": "RR-0002",
+   "shipment_id": "APX-2610161",
+   "ts_utc": "2026-10-10T21:24Z"
+  },
+  {
+   "actor": "exception-agent",
+   "driver_id": "DRV-1060",
+   "driver_name": "Diego Marchetti",
+   "message": "APX-2610140 reassigned to Diego Marchetti (DRV-1060). New ETA 17:27 UTC. Customer notified.",
+   "new_eta_utc": "2026-10-14T17:27Z",
+   "proposal_id": "RR-0001",
+   "shipment_id": "APX-2610140",
+   "ts_utc": "2026-10-10T21:24Z"
+  }
+ ]
+}

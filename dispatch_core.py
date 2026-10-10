@@ -154,6 +154,29 @@ class Dispatch:
         with open(path, newline="", encoding="utf-8") as handle:
             return list(csv.DictReader(handle))
 
+    # ---- state reset ------------------------------------------------------
+    def reset_state(self):
+        """Reload the CSVs into memory - the same result as a container restart.
+
+        Everything in flight is dropped, then the reset itself is recorded so
+        the board can show who did it.
+        """
+        with self.lock:
+            self.proposals = {}
+            self.proposal_order = []
+            self.proposal_seq = 0
+            self.updates = []
+            self.audit = []
+            self.held_drivers = set()
+            self._last_header_names = None
+            self.shipments = {}
+            self.drivers = {}
+            self.terminals = {}
+            self.trucks = {}
+            self.load()
+            self._audit("admin.reset", message="demo reset by dispatcher (local)")
+        return {"ok": True, "loads_open": len(self.list_exceptions())}
+
     # ---- lookups ----------------------------------------------------------
     def shipment(self, shipment_id):
         row = self.shipments.get(shipment_id)

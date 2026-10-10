@@ -63,6 +63,20 @@ approval is skipped.
    → prints the saved server names only; `firecrawl-mcp`, `kong-konnect` and
    `Origin` must all still be there.
 
+## Recording a run for the public replay page
+
+```bash
+python3 export_run.py --snapshot /tmp/run-start.json   # BEFORE the run: the full board
+#   ... run the agent, approve one proposal, run squad_activity ...
+python3 export_run.py --start /tmp/run-start.json -o data/run.json
+cp data/run.json ~/apextrans-demo/dispatch-site/data/run.json
+cd ~/apextrans-demo/dispatch-site && vercel --prod
+```
+
+`export_run.py` reads only, needs no keys, and strips header-name logs and any
+addresses before writing. The replay page starts at the full board and applies
+each event in order, so it can be shown without a live service.
+
 ## Kong wiring (once, before the panel)
 
 ```bash
@@ -82,6 +96,17 @@ data plane).
 
 The board stamps a content hash onto `board.css` / `board.js`, so a rebuild is
 never served stale out of the browser cache.
+
+## Local reset and the replay page
+
+The board's **Reset demo** button only appears when you open it on `localhost`.
+It asks for the local admin token (kept in the tab, never shown) and calls
+`POST /admin/reset`, which reloads the CSVs in memory - the same result as a
+container restart. The endpoint is refused unless the caller is the docker host
+*and* presents the token, so it can never be reached from Kong. The token lives
+in `~/.apextrans/admin-token` and is passed in at start via
+`--env-file ~/.apextrans/admin.env`; it is deliberately not in the Kong keys file
+and is never printed.
 
 ## If this breaks
 

@@ -10,6 +10,7 @@ Run:  python3 app.py            (listens on 0.0.0.0:8090)
 from __future__ import annotations
 
 import hashlib
+import hmac
 import json
 import os
 import re
@@ -57,6 +58,50 @@ def kong_data_plane_ip(force=False):
             except OSError:
                 _kong_ip = None
         return _kong_ip
+
+
+ADMIN_TOKEN = os.environ.get("APEX_ADMIN_TOKEN", "")
+
+
+def host_gateway_ip():
+    """Default-route gateway inside the container, on a plain docker bridge."""
+    try:
+        with open("/proc/net/route", encoding="utf-8") as handle:
+            for line in handle.readlines()[1:]:
+                fields = line.split()
+                if len(fields) > 2 and fields[1] == "00000000":
+                    gateway = fields[2]
+                    return ".".join(str(int(gateway[i:i + 2], 16)) for i in (6, 4, 2, 0))
+    except OSError:
+        pass
+    return ""
+
+
+def peer_subnet_prefix():
+    """The container network this service shares with the gateway's neighbours."""
+    kong = kong_data_plane_ip()
+    if kong and kong.count(".") == 3:
+        return ".".join(kong.split(".")[:3]) + "."
+    return ""
+
+
+def is_local_host(client_ip):
+    """True when the caller looks like the docker host rather than a container.
+
+    Docker Desktop publishes the host's traffic from its bridge address (e.g.
+    192.168.65.1), which is outside the container network; a plain bridge
+    presents the default-route gateway instead. A peer *container* - Kong
+    included - is always refused, because it shares this network.
+    """
+    if not client_ip or client_ip == kong_data_plane_ip():
+        return False
+    override = os.environ.get("APEX_HOST_GATEWAY_IP", "")
+    if override and client_ip in [x.strip() for x in override.split(",") if x.strip()]:
+        return True
+    if client_ip == host_gateway_ip():
+        return True
+    prefix = peer_subnet_prefix()
+    return bool(prefix) and not client_ip.startswith(prefix)
 
 
 def asset_version():
@@ -162,6 +207,18 @@ class Handler(BaseHTTPRequestHandler):
             }.get(path)
         if what:
             DISPATCH.record_lookup(identity, what)
+
+    def _admin_allowed(self):
+        """Local dispatch only: the host address AND the admin token."""
+        client = self._client_ip()
+        if not is_local_host(client):
+            return False, "not the local host"
+        presented = (self.headers.get("X-Admin-Token") or "").strip()
+        if not ADMIN_TOKEN:
+            return False, "no admin token configured"
+        if not hmac.compare_digest(presented, ADMIN_TOKEN):
+            return False, "bad admin token"
+        return True, "local dispatcher"
 
     def _write_allowed(self):
         """True only for the Kong data plane (or an explicit test override)."""
@@ -303,6 +360,17 @@ class Handler(BaseHTTPRequestHandler):
         parsed = urlparse(self.path)
         path = parsed.path.rstrip("/") or "/"
         try:
+            # Admin routes sit ahead of the gateway write guard on purpose: the
+            # reset is a local-only convenience, never a Kong tool.
+            if path.startswith("/admin/"):
+                allowed, detail = self._admin_allowed()
+                if not allowed:
+                    DISPATCH.blocked_write(self._client_ip(), self.command, path)
+                    return self._send_json({"error": "admin endpoints are local only"}, status=403)
+                if path == "/admin/reset":
+                    return self._send_json(DISPATCH.reset_state())
+                return self._error("no admin route for %s" % path, 404)
+
             allowed, detail = self._write_allowed()
             if not allowed:
                 DISPATCH.blocked_write(detail, self.command, path)
