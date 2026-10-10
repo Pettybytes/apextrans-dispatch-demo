@@ -1,0 +1,164 @@
+# ApexTrans dispatch MCP server for Kong AI Gateway.
+#
+# Kong exposes the apex-dispatch REST endpoints as MCP tools, so an agent can
+# read exceptions and propose/approve reroutes without knowing anything about
+# the gateway. One tool per operationId in openapi.json, except get_health.
+#
+# ---------------------------------------------------------------------------
+# TWO FIELD NAMES I WAS LEAST SURE ABOUT (verify against your kongctl/Konnect
+# version before applying):
+#   1. `config.route.paths` - the documented Petstore sample shows `route.paths`
+#      as a list, but the rest of the `route` object is undocumented, so confirm
+#      the conversion-listener really wants a list of proxy paths there.
+#   2. `access.acls.allow` on a single tool - the sample only shows the
+#      server-level `access.default_tool_acls`; the per-tool `access` block used
+#      on `approve_reroute` (to restrict it to dispatch-supervisor) does not
+#      appear in that sample, so `access > acls > allow` is my best reading of
+#      its nesting.
+# ---------------------------------------------------------------------------
+#
+# Note from Kong: tool arguments are renamed `{in}_{name}`, so path
+# `shipment_id` arrives as `path_shipment_id` and query `status` as `query_status`.
+# Body fields collapse into a single `body` property. exception_agent.py already
+# uses those names when it talks through the gateway.
+
+ai_gateway_mcp_servers:
+  - ref: apex-dispatch-mcp
+    ai_gateway: !lookup {id: !env AI_GATEWAY_ID}
+    display_name: ApexTrans Dispatch Tools
+    name: apex-dispatch-mcp
+    type: conversion-listener
+    enabled: true
+    policies: []
+    access:
+      acl_attribute_type: consumer
+      auth_strategies: [squad-key-auth]
+      acls:
+        allow: []
+      default_tool_acls:
+        deny: []
+    config:
+      url: http://apex-dispatch:8090
+      route:
+        paths:
+          - "/apex-dispatch"
+      logging:
+        payloads: false
+      server:
+        timeout: 60000
+    tools:
+      - name: list_exceptions
+        description: List the shipment exceptions that are open and waiting on a dispatch decision.
+        method: GET
+        path: "/apex-dispatch/exceptions"
+
+      - name: get_shipment
+        description: Get one shipment by id, including its customer, current driver, ETA and remaining miles.
+        method: GET
+        path: "/apex-dispatch/shipments/{shipment_id}"
+        parameters:
+          - name: shipment_id
+            in: path
+            required: true
+            schema: {type: string}
+            description: Shipment id to look up, for example APX-2610141
+
+      - name: list_available_drivers
+        description: List drivers who are available to take a load, optionally filtered by terminal, equipment or endorsement; pass shipment_id to also get each driver's deadhead miles, reroute cost and equipment/endorsement match.
+        method: GET
+        path: "/apex-dispatch/drivers/available"
+        parameters:
+          - name: terminal
+            in: query
+            required: false
+            schema: {type: string}
+            description: Driver current terminal code, for example DEN
+          - name: equipment
+            in: query
+            required: false
+            schema: {type: string}
+            description: Exact equipment the driver must have, for example Reefer 53ft
+          - name: endorsement
+            in: query
+            required: false
+            schema: {type: string}
+            description: Endorsement the driver must hold, for example Hazmat
+          - name: shipment_id
+            in: query
+            required: false
+            schema: {type: string}
+            description: Shipment to measure deadhead miles and reroute cost against
+
+      - name: list_pending_reroutes
+        description: List the reroute proposals that are held and waiting for a human to approve them.
+        method: GET
+        path: "/apex-dispatch/reroutes"
+        parameters:
+          - name: status
+            in: query
+            required: false
+            schema: {type: string, enum: [pending, all]}
+            description: Use pending to return only proposals held for a human
+
+      - name: create_reroute
+        description: Propose moving a shipment to a different driver; it applies automatically when there are no rule conflicts and the cost is within the limit, otherwise it is held for a human.
+        method: POST
+        path: "/apex-dispatch/reroutes"
+        request_body:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [shipment_id, new_driver_id]
+                properties:
+                  shipment_id:
+                    type: string
+                    description: Shipment to move, for example APX-2610141
+                  new_driver_id:
+                    type: string
+                    description: Driver to move it to, for example DRV-1004
+                  reason:
+                    type: string
+                    description: Short reason for the reroute
+                  requested_by:
+                    type: string
+                    description: Who or what asked for the reroute
+
+      - name: approve_reroute
+        description: Approve a reroute proposal that is held for a human; only the dispatch supervisor may see or call this tool.
+        method: POST
+        path: "/apex-dispatch/reroutes/{proposal_id}/approve"
+        access:
+          acls:
+            allow: [dispatch-supervisor]
+        parameters:
+          - name: proposal_id
+            in: path
+            required: true
+            schema: {type: string}
+            description: Proposal id to approve, for example RR-0003
+        request_body:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [approver]
+                properties:
+                  approver:
+                    type: string
+                    description: Name of the supervisor approving the reroute
+                  note:
+                    type: string
+                    description: Optional note recorded with the approval
+
+      - name: list_updates
+        description: List the applied reroutes and the customer-facing ETA message for each, newest first.
+        method: GET
+        path: "/apex-dispatch/updates"
+
+      - name: list_audit
+        description: List every proposal, decision and approval with UTC timestamps, newest first.
+        method: GET
+        path: "/apex-dispatch/audit"
