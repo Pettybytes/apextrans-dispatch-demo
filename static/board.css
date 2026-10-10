@@ -167,6 +167,37 @@ body {
 
 .empty { color: var(--muted); font-size: 12px; padding: 6px 0; }
 
+/* live-feed identity chips */
+.chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(30, 42, 69, .65);
+  margin-bottom: 4px;
+}
+.chip {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 99px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.chip.on { border-color: var(--amber); color: var(--amber); background: rgba(245,165,36,.08); }
+.who {
+  font-size: 10.5px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  padding: 1px 7px;
+  flex: none;
+}
+
 /* ------------------------------------------------------------- checklist */
 .check { display: flex; align-items: flex-start; gap: 10px; padding: 9px 0; border-bottom: 1px solid rgba(30,42,69,.65); }
 .check:last-child { border-bottom: 0; }

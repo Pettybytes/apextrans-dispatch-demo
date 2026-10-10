@@ -19,6 +19,7 @@
     audit: [],
     shipments: {},          // shipment_id -> full record (terminals, margin)
     squads: null,
+    filter: 'All',
     ok: true
   };
 
@@ -229,13 +230,14 @@
     $('exCount').textContent = rows.length + (rows.length === 1 ? ' load' : ' loads');
     $('exGrid').innerHTML = rows.map(function (r) {
       var e = r.e;
-      var driverLine = r.driver
-        ? esc(r.driver) + ' <span class="muted">' + esc(r.driverId) + '</span>'
-        : '<span class="muted">No driver proposed yet</span>';
+      var open = !r.p;
+      var driverLine = open
+        ? '<span class="muted">Waiting for the copilot</span>'
+        : esc(r.driver) + ' (' + esc(r.driverId) + ')';
       var facts = num(e.remaining_miles) + ' mi left · ' + num(e.miles) + ' mi total';
       if (e.late_vs_due_hours > 0) facts += ' · ' + num(e.late_vs_due_hours) + ' h behind due';
-      var why = r.p ? plainWhy(r.p.conflicts) : 'No proposal yet.';
-      var cost = r.p ? money(r.cost) : '—';
+      var whyLine = open ? '' : '<div class="ex-why">' + esc(plainWhy(r.p.conflicts)) + '</div>';
+      var costSlot = open ? '' : '<span class="ex-cost num">' + esc(money(r.cost)) + '</span>';
       return '' +
         '<article class="ex ' + r.status + '">' +
           '<div class="ex-top">' +
@@ -249,10 +251,10 @@
             (r.truckStatus ? ' · ' + esc(r.truckStatus) : '') +
             (r.openDefect ? ' · ' + esc(r.openDefect) : '') + '</div>' : '') +
           (hosClock(r.p) ? '<div class="ex-why">' + esc(hosClock(r.p)) + '</div>' : '') +
-          '<div class="ex-why">' + esc(why) + '</div>' +
+          whyLine +
           '<div class="ex-foot">' +
             '<span class="pill ' + r.status + '">' + esc(PILL[r.status] || r.status) + '</span>' +
-            '<span class="ex-cost num">' + esc(cost) + '</span>' +
+            costSlot +
           '</div>' +
         '</article>';
     }).join('');
@@ -360,34 +362,86 @@
       return '' +
         '<div class="row">' +
           '<span class="s">' + esc(r.e.shipment_id) + '</span>' +
-          '<span class="d">' + esc(r.driver || 'No driver') + (r.driverId ? ' · ' + esc(r.driverId) : '') + ' · ' + esc(money(r.cost)) + '</span>' +
+          '<span class="d">' + esc(r.driver) + ' (' + esc(r.driverId) + ') · ' + esc(money(r.cost)) + '</span>' +
           '<span class="st waiting">Waiting</span>' +
         '</div>';
     }).join('');
   }
 
+  /* Who did it, in one word, for the feed label and the filter chips. */
+  function actorLabel(actor) {
+    var a = String(actor || '').toLowerCase();
+    if (a.indexOf('agent') >= 0) return 'Copilot';
+    if (a.indexOf('supervisor') >= 0) return 'Supervisor';
+    if (a.indexOf('support') >= 0) return 'Support';
+    if (a.indexOf('compliance') >= 0) return 'Compliance';
+    return 'Dispatcher';
+  }
+
+  var FILTERS = ['All', 'Copilot', 'Supervisor', 'Support', 'Compliance'];
+
+  /* Applied reroutes from /updates, interleaved with attributed reads from /audit. */
+  function feedItems() {
+    var out = [];
+    state.updates.forEach(function (u) {
+      out.push({
+        ts: u.ts_utc,
+        subject: u.shipment_id,
+        who: actorLabel(u.actor),
+        driver: u.driver_name ? (u.driver_name + ' (' + u.driver_id + ')') : '',
+        word: 'Applied',
+        cls: 'recovered'
+      });
+    });
+    state.audit.forEach(function (a) {
+      if (a.event !== 'read.lookup') return;
+      out.push({
+        ts: a.ts_utc,
+        subject: a.subject || '',
+        who: actorLabel(a.identity),
+        driver: '',
+        word: 'Read',
+        cls: 'waiting'
+      });
+    });
+    out.sort(function (x, y) { return String(y.ts).localeCompare(String(x.ts)); });
+    return out;
+  }
+
   function renderActivity() {
-    var feed = state.updates.slice(0, 6);
-    $('actCount').textContent = state.updates.length + ' events';
-    if (!feed.length) {
-      $('activity').innerHTML = '<div class="empty">No reroutes have been applied yet.</div>';
-      return;
-    }
-    $('activity').innerHTML = feed.map(function (u) {
-      var p = null;
-      for (var i = 0; i < state.proposals.length; i++) {
-        if (state.proposals[i].proposal_id === u.proposal_id) { p = state.proposals[i]; break; }
-      }
-      var st = statusOf(p);
-      var word = st === 'approved' ? 'Approved' : (st === 'recovered' ? 'Recovered' : 'Applied');
+    var all = feedItems();
+    var feed = state.filter === 'All' ? all : all.filter(function (i) { return i.who === state.filter; });
+    $('actCount').textContent = feed.length + (feed.length === 1 ? ' event' : ' events');
+
+    var chips = '<div class="chips">' + FILTERS.map(function (name) {
+      return '<button class="chip' + (state.filter === name ? ' on' : '') +
+             '" data-filter="' + name + '">' + name + '</button>';
+    }).join('') + '</div>';
+
+    var rows = feed.slice(0, 8).map(function (i) {
       return '' +
         '<div class="row">' +
-          '<span class="t num">' + esc(hhmm(u.ts_utc)) + 'Z</span>' +
-          '<span class="s">' + esc(u.shipment_id) + '</span>' +
-          '<span class="d">' + esc(u.driver_name || u.driver_id || '') + '</span>' +
-          '<span class="st ' + st + '">' + esc(word) + '</span>' +
+          '<span class="t num">' + esc(hhmm(i.ts)) + 'Z</span>' +
+          '<span class="who">' + esc(i.who) + '</span>' +
+          '<span class="s">' + esc(i.subject) + '</span>' +
+          '<span class="d">' + esc(i.driver) + '</span>' +
+          '<span class="st ' + i.cls + '">' + esc(i.word) + '</span>' +
         '</div>';
     }).join('');
+
+    if (!rows) {
+      rows = '<div class="empty">' + (state.filter === 'All'
+        ? 'Nothing yet. Reroutes and attributed lookups land here.'
+        : 'Nothing from ' + esc(state.filter) + ' yet.') + '</div>';
+    }
+
+    $('activity').innerHTML = chips + rows;
+    Array.prototype.forEach.call(document.querySelectorAll('#activity .chip'), function (button) {
+      button.addEventListener('click', function () {
+        state.filter = button.getAttribute('data-filter');
+        renderActivity();
+      });
+    });
   }
 
   function renderChecklist(rows) {

@@ -34,6 +34,10 @@ ALLOW_DIRECT_WRITES = os.environ.get("APEX_ALLOW_DIRECT_WRITES", "").strip().low
 
 WRITE_REFUSED = {"error": "writes are only accepted through Kong AI Gateway"}
 
+# Consumer identity headers a gateway may forward. We use the first one present
+# and never invent an identity when none arrives.
+CONSUMER_HEADERS = ("X-Consumer-Username", "X-Consumer-Custom-Id", "X-Consumer-Id", "X-Anonymous-Consumer")
+
 _kong_ip = None
 _kong_ip_lock = threading.Lock()
 
@@ -93,6 +97,42 @@ class Handler(BaseHTTPRequestHandler):
     def _client_ip(self):
         return self.client_address[0] if self.client_address else ""
 
+    def _identity(self):
+        """Consumer identity the gateway forwarded, plus the header names seen.
+
+        Only header NAMES are recorded for diagnosis - never their values.
+        """
+        names = sorted(self.headers.keys())
+        for header in CONSUMER_HEADERS:
+            value = (self.headers.get(header) or "").strip()
+            if value:
+                return value, names
+        return "direct", names
+
+    def _record_read(self, path):
+        """Attribute a read to its caller, when the gateway named one.
+
+        A caller with no identity (the board polling from a browser, the host)
+        is left unattributed rather than guessed at, so /audit stays readable.
+        """
+        identity, names = self._identity()
+        DISPATCH.record_header_names(names)
+        if identity == "direct":
+            return
+        match = SHIPMENT_RE.match(path)
+        if match:
+            what = unquote(match.group("shipment_id"))
+        else:
+            what = {
+                "/exceptions": "the exception board",
+                "/drivers/available": "available drivers",
+                "/reroutes": "the approvals queue",
+                "/updates": "the updates feed",
+                "/audit": "the audit log",
+            }.get(path)
+        if what:
+            DISPATCH.record_lookup(identity, what)
+
     def _write_allowed(self):
         """True only for the Kong data plane (or an explicit test override)."""
         if ALLOW_DIRECT_WRITES:
@@ -148,6 +188,7 @@ class Handler(BaseHTTPRequestHandler):
         parsed = urlparse(self.path)
         path = parsed.path.rstrip("/") or "/"
         query = {k: v[0] for k, v in parse_qs(parsed.query).items()}
+        self._record_read(path)
         try:
             if path == "/":
                 return self._send_json(

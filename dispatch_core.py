@@ -112,6 +112,7 @@ class Dispatch:
         self.updates = []          # newest last internally, served newest first
         self.audit = []            # newest last internally, served newest first
         self.held_drivers = set()  # drivers holding a pending proposal
+        self._last_header_names = None
         self.load()
 
     # ---- loading ----------------------------------------------------------
@@ -445,6 +446,7 @@ class Dispatch:
             "proposal_id": proposal["proposal_id"],
             "driver_id": driver[DRIVER_KEY],
             "driver_name": driver["name"],
+            "actor": actor or "dispatcher",
             "new_eta_utc": proposal["new_eta_utc"],
             "message": message,
         }
@@ -582,6 +584,27 @@ class Dispatch:
             method=method,
             path=path,
         )
+
+    def record_lookup(self, identity, what):
+        """Attribute a read to the caller the gateway named. No request bodies."""
+        return self._audit(
+            "read.lookup",
+            message="%s looked up %s" % (identity, what),
+            identity=identity,
+            subject=what,
+        )
+
+    def record_header_names(self, names):
+        """Note the header NAMES a caller sent, once per new set.
+
+        Names only - never values - so we can find out what Kong forwards
+        without recording anything sensitive.
+        """
+        names = sorted(names or [])
+        if names == self._last_header_names:
+            return None
+        self._last_header_names = names
+        return self._audit("request.headers", message="header names: %s" % ", ".join(names), headers=names)
 
     # ---- audit ------------------------------------------------------------
     def _audit(self, event, **fields):

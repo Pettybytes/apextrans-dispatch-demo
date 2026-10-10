@@ -660,6 +660,15 @@ def main():
         note("no model picks to validate - using the best valid candidate per exception")
     resolved = resolve_picks(exceptions, candidates_by_shipment, model_picks)
 
+    # Driver names are always shown as "Name (DRV-1234)" - name first.
+    names = {}
+    for rows in candidates_by_shipment.values():
+        for candidate in rows:
+            names[candidate["driver_id"]] = candidate.get("name") or candidate["driver_id"]
+
+    def who(driver_id):
+        return "%s (%s)" % (names.get(driver_id, driver_id), driver_id)
+
     # 4. call the reroute tool
     step(4, "call the reroute tool")
     auto, held = [], []
@@ -671,13 +680,14 @@ def main():
         if verdict == "auto_applied":
             auto.append(proposal)
             print("    %sAUTO-APPLIED%s %s -> %s  $%.2f  ETA %s"
-                  % (GREEN, RESET, proposal["shipment_id"], proposal["new_driver_id"],
+                  % (GREEN, RESET, proposal["shipment_id"], who(proposal["new_driver_id"]),
                      proposal["reroute_cost_usd"], proposal["new_eta_utc"]))
             note(pick.get("reason", ""))
         else:
             held.append(proposal)
             print("    %sHELD FOR HUMAN%s %s -> %s  $%.2f"
-                  % (AMBER, RESET, proposal["shipment_id"], proposal["new_driver_id"], proposal["reroute_cost_usd"]))
+                  % (AMBER, RESET, proposal["shipment_id"], who(proposal["new_driver_id"]),
+                     proposal["reroute_cost_usd"]))
             note(pick.get("reason", ""))
             for conflict in proposal["conflicts"]:
                 print("        %s! %s%s" % (AMBER, conflict, RESET))
